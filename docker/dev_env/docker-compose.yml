@@ -1,0 +1,18 @@
+services:
+  # Dev Env
+  py_dev:
+    build:
+      context: .
+      dockerfile: dev_env.dockerfile
+    environment:
+      PYTHONPATH: ${PYTHONPATH}
+      AIRFLOW_UID: ${AIRFLOW_UID}
+      AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
+    networks:
+      - default_net
+    command:
+      sleep infinity
+
+networks:
+  default_net:
+    driver: bridge
