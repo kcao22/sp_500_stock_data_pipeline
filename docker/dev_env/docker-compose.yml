@@ -2,8 +2,10 @@ services:
   # Dev Env
   py_dev:
     build:
-      context: .
-      dockerfile: dev_env.dockerfile
+      context: ..
+      dockerfile: dev_env/dev_env.dockerfile
+    env_file:
+      - ../.env
     environment:
       PYTHONPATH: ${PYTHONPATH}
       AIRFLOW_UID: ${AIRFLOW_UID}
