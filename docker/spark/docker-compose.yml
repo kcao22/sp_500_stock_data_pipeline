@@ -4,8 +4,6 @@ services:
     build:
       context: ..
       dockerfile: spark/spark.dockerfile
-    env_file:
-      - .env
     #user: root # Run container as root container: https://docs.bitnami.com/tutorials/work-with-non-root-containers/
     hostname: spark
     networks:
@@ -29,8 +27,6 @@ services:
       build:
         context: ..
         dockerfile: spark/spark.dockerfile
-      env_file:
-        - .env
       #user: root
       networks:
         - default_net
