@@ -1,50 +1,54 @@
-  services:
-    # Spark
-    spark-master:
-      build:
-        context: .
-        dockerfile: spark.dockerfile
-      #user: root # Run container as root container: https://docs.bitnami.com/tutorials/work-with-non-root-containers/
-      hostname: spark
-      networks:
-          - default_net
-      environment:
-          - SPARK_MODE=master
-          - SPARK_RPC_AUTHENTICATION_ENABLED=no
-          - SPARK_RPC_ENCRYPTION_ENABLED=no
-          - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-          - SPARK_SSL_ENABLED=no
-          - PYTHONPATH=${PYTHONPATH}
-          - AIRFLOW_PROJ_DIR=${AIRFLOW_PROJ_DIR}
-      volumes:
-          - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-          - ${AIRFLOW_PROJ_DIR:-.}/spark_resources:/opt/airflow/spark_resources
-      ports:
-          - "8082:8080"
-          - "7077:7077"
+services:
+  # Spark
+  spark-master:
+    build:
+      context: ..
+      dockerfile: spark/spark.dockerfile
+    env_file:
+      - .env
+    #user: root # Run container as root container: https://docs.bitnami.com/tutorials/work-with-non-root-containers/
+    hostname: spark
+    networks:
+        - default_net
+    environment:
+        - SPARK_MODE=master
+        - SPARK_RPC_AUTHENTICATION_ENABLED=no
+        - SPARK_RPC_ENCRYPTION_ENABLED=no
+        - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+        - SPARK_SSL_ENABLED=no
+        - PYTHONPATH=${PYTHONPATH}
+        - AIRFLOW_PROJ_DIR=${AIRFLOW_PROJ_DIR}
+    volumes:
+        - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+        - ${AIRFLOW_PROJ_DIR:-.}/spark_resources:/opt/airflow/spark_resources
+    ports:
+        - "8082:8080"
+        - "7077:7077"
 
-    spark-worker:
-        build:
-          context: .
-          dockerfile: spark.dockerfile
-        #user: root
-        networks:
-          - default_net
-        environment:
-          - SPARK_MODE=worker
-          - SPARK_MASTER_URL=spark://spark:7077
-          - SPARK_WORKER_MEMORY=1G
-          - SPARK_WORKER_CORES=1
-          - SPARK_RPC_AUTHENTICATION_ENABLED=no
-          - SPARK_RPC_ENCRYPTION_ENABLED=no
-          - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
-          - SPARK_SSL_ENABLED=no
-          - PYTHONPATH=${PYTHONPATH}
-          - AIRFLOW_PROJ_DIR=${AIRFLOW_PROJ_DIR}
-          - AIRFLOW_UID=${AIRFLOW_UID}
-        volumes:
-          - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-          - ${AIRFLOW_PROJ_DIR:-.}/spark_resources:/opt/airflow/spark_resources
+  spark-worker:
+      build:
+        context: ..
+        dockerfile: spark/spark.dockerfile
+      env_file:
+        - .env
+      #user: root
+      networks:
+        - default_net
+      environment:
+        - SPARK_MODE=worker
+        - SPARK_MASTER_URL=spark://spark:7077
+        - SPARK_WORKER_MEMORY=1G
+        - SPARK_WORKER_CORES=1
+        - SPARK_RPC_AUTHENTICATION_ENABLED=no
+        - SPARK_RPC_ENCRYPTION_ENABLED=no
+        - SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED=no
+        - SPARK_SSL_ENABLED=no
+        - PYTHONPATH=${PYTHONPATH}
+        - AIRFLOW_PROJ_DIR=${AIRFLOW_PROJ_DIR}
+        - AIRFLOW_UID=${AIRFLOW_UID}
+      volumes:
+        - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
+        - ${AIRFLOW_PROJ_DIR:-.}/spark_resources:/opt/airflow/spark_resources
 
 networks:
   default_net:
