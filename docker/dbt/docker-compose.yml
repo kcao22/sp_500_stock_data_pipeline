@@ -9,6 +9,7 @@ services:
       AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
     volumes:
       - ${AIRFLOW_PROJ_DIR}/dbt/star:/usr/app/star
+    working_dir: /usr/app/star
     networks:
       - default_net
 
