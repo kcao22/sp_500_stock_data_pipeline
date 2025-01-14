@@ -1,0 +1,17 @@
+services:
+  dbt:
+    build:
+      context: ..
+      dockerfile: dbt/dbt.dockerfile
+    environment:
+      PYTHONPATH: ${PYTHONPATH}
+      AIRFLOW_UID: ${AIRFLOW_UID}
+      AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
+    volumes:
+      - ${AIRFLOW_PROJ_DIR}/dbt/star:/usr/app/star
+    networks:
+      - default_net
+
+networks:
+  default_net:
+    driver: bridge
