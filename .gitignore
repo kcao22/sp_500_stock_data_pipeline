@@ -164,3 +164,4 @@ docker/config
 docker/dags
 docker/plugins
 
+logs/
