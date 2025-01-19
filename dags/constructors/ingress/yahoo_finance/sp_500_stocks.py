@@ -1,5 +1,6 @@
 import pendulum
 from apps import af_utils
+from apps.data_source_utils import yahoo_finance_utils
 from airflow.decorators import dag, task
 
 @dag(
@@ -11,10 +12,14 @@ from airflow.decorators import dag, task
 )
 def dag():
     @task
-    def print_hello():
-        print("Hello world")
+    def test_get_google_site():
+        scraper = yahoo_finance_utils.yahoo_finance_scraper(
+            url="https://finance.yahoo.com/quote/GOOGL/"
+        )
+        response = scraper.test_get_data()
+        print(response)
 
-    print_hello()
+    test_get_google_site()
 
 
 dag()
