@@ -165,3 +165,4 @@ docker/dags
 docker/plugins
 
 logs/
+docker/dbt/star/dbt_packages/*

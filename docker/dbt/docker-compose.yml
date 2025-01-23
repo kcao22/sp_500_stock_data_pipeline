@@ -3,13 +3,10 @@ services:
     build:
       context: ..
       dockerfile: dbt/dbt.dockerfile
-    environment:
-      PYTHONPATH: ${PYTHONPATH}
-      AIRFLOW_UID: ${AIRFLOW_UID}
-      AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
     volumes:
-      - ${AIRFLOW_PROJ_DIR}/dbt/star:/usr/app/star
-    working_dir: /usr/app/star
+      - ../dbt/star:/usr/app/dbt/star
+    entrypoint: [ "/bin/sh", "-c" ]
+    command: [ "ls -ltr && ls -ltr ./star && cd ./star && dbt deps && dbt run" ]
     networks:
       - default_net
 

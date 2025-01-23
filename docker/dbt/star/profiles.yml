@@ -1,0 +1,11 @@
+stock_transaction_streaming_profile:
+  target: prod
+  outputs:
+    prod:
+      type: postgres
+      threads: 1
+      host: data-warehouse
+      port: 5432
+      user: ${POSTGRES_USER}
+      pass: ${POSTGRES_PASSWORD}
+      dbname: ${POSTGRES_DB}
