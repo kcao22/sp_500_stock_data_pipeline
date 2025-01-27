@@ -6,7 +6,7 @@ services:
     volumes:
       - ../dbt/star:/usr/app/dbt/star
     entrypoint: [ "/bin/sh", "-c" ]
-    command: [ "ls -ltr && ls -ltr ./star && cd ./star && dbt deps && dbt run" ]
+    command: [ "ls -ltr && dbt deps && dbt run && sleep infinity"]
     networks:
       - default_net
 
