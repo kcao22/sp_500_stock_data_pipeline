@@ -9,3 +9,4 @@ stock_transaction_streaming_profile:
       user: ${POSTGRES_USER}
       pass: ${POSTGRES_PASSWORD}
       dbname: ${POSTGRES_DB}
+      schema: ${POSTGRES_SCHEMA}
