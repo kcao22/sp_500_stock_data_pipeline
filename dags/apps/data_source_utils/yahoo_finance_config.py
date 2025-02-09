@@ -1,4 +1,4 @@
-sp_500_symbols = [
+SP_500_SYMBOLS_CONFIG = [
 	"AAPL", "NVDA", "MSFT", "AMZN", "GOOGL", "GOOG", "META", "TSLA", "AVGO", "BRK-B", "WMT", "LLY",
 	"JPM", "V", "MA", "ORCL", "XOM", "UNH", "COST", "PG", "HD", "NFLX", "JNJ", "BAC", "CRM", "ABBV",
 	"KO", "TMUS", "CVX", "MRK", "WFC", "CSCO", "ACN", "NOW", "AXP", "MCD", "PEP", "BX", "IBM", "DIS",
@@ -37,4 +37,35 @@ sp_500_symbols = [
 	"TECH", "SOLV", "ALLE", "BG", "AIZ", "IPG", "BEN", "EMN", "ALB", "MGM", "AOS", "WYNN", "PNW",
 	"ENPH", "LKQ", "FRT", "CRL", "GNRC", "AES", "GL", "LW", "HSIC", "MKTX", "MTCH", "TFX", "WBA",
 	"HAS", "IVZ", "APA", "MOS", "PARA", "MHK", "CE", "HII", "CZR", "BWA", "QRVO", "FMC", "AMTM"
+]
+
+DAILY_EXTRACT_CONFIG = [
+	{
+		"target_field": "previous_close",
+		"element": "fin-streamer",
+		"identifier_attribute": "data-field",
+		"identifier_value": "regularMarketPreviousClose",
+		"is_data_value": True
+	},
+	{
+		"target_field": "open",
+		"element": "fin-streamer",
+		"identifier_attribute": "data-field",
+		"identifier_value": "regularMarketOpen",
+		"is_data_value": True
+	},
+	{
+		"target_field": "bid",
+		"element": "span",
+		# "text_field": "Bid",
+		"text_class": "value yf-gn3zu3",
+		"is_text_value": True
+	},
+	{
+		"target_field": "ask",
+		"element": "span",
+		# "text_field": "Ask",
+		"text_class": "value yf-gn3zu3",
+		"is_text_value": True
+	}
 ]
