@@ -17,9 +17,17 @@ def dag():
             url="https://finance.yahoo.com/quote/GOOGL/"
         )
         response = scraper.test_get_data()
-        print(response)
+        print(response.prettify())
+
+    @task
+    def test_get_config():
+        scraper = yahoo_finance_utils.yahoo_finance_scraper(
+            url="https://finance.yahoo.com/quote/GOOGL/"
+        )
+        scraper.get_daily_data()
 
     test_get_google_site()
+    test_get_config()
 
 
 dag()
