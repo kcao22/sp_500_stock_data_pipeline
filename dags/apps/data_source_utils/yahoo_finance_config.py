@@ -42,30 +42,36 @@ SP_500_SYMBOLS_CONFIG = [
 DAILY_EXTRACT_CONFIG = [
 	{
 		"target_field": "previous_close",
-		"element": "fin-streamer",
+		"html_element_tag": "fin-streamer",
 		"identifier_attribute": "data-field",
 		"identifier_value": "regularMarketPreviousClose",
 		"is_data_value": True
 	},
 	{
 		"target_field": "open",
-		"element": "fin-streamer",
+		"html_element_tag": "fin-streamer",
 		"identifier_attribute": "data-field",
 		"identifier_value": "regularMarketOpen",
 		"is_data_value": True
 	},
 	{
 		"target_field": "bid",
-		"element": "span",
-		# "text_field": "Bid",
-		"text_class": "value yf-gn3zu3",
-		"is_text_value": True
+		"html_element_tag": "span",
+		"text_class_name": "label yf-gn3zu3",
+		"text_class_filter": "Bid",
+		"sibling_html_element_value_tag": "span",
+		"sibling_html_element_value_class": "value yf-gn3zu3",
+		"is_text_value": True,
+		"is_nested_text_value": True
 	},
 	{
 		"target_field": "ask",
-		"element": "span",
-		# "text_field": "Ask",
-		"text_class": "value yf-gn3zu3",
-		"is_text_value": True
+		"html_element_tag": "span",
+		"text_class_name": "label yf-gn3zu3",
+		"text_class_filter": "Ask",
+		"sibling_html_element_value_tag": "span",
+		"sibling_html_element_value_class": "value yf-gn3zu3",
+		"is_text_value": True,
+		"is_nested_text_value": True
 	}
 ]
