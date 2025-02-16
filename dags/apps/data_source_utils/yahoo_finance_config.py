@@ -158,7 +158,7 @@ DAILY_EXTRACT_CONFIG = [
 		"target_field": "forward_dividend_and_yield",  # The projected annual dividend (what a company pays a shareholder) per share and its percentage of the stock price
 		"html_element_tag": "span",
 		"text_class_name": "label yf-gn3zu3",
-		"text_class_filter": "Forward Dividend &amp; Yield",
+		"text_class_filter": "Forward Dividend & Yield",
 		"sibling_html_element_value_tag": "span",
 		"sibling_html_element_value_class": "value yf-gn3zu3",
 		"is_text_value": True,
