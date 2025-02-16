@@ -23,15 +23,19 @@ class yahoo_finance_scraper(BeautifulSoupScraper):
 			if field_config.get("is_data_value"):
 				data_value = super().get_element_data_value(
 					soup_object=soup,
-					html_element_tag=field_config.get("element"),
+					html_element_tag=field_config.get("html_element_tag"),
 					identifier_attribute=field_config.get("identifier_attribute"),
 					identifier_value=field_config.get("identifier_value")
 				)
-			else:
+			elif field_config.get("is_text_value"):
 				data_value = super().get_element_text_value(
 					soup_object=soup,
-					html_element_tag=field_config.get("element"),
-					text_class_name=field_config.get("text_class")
+					html_element_tag=field_config.get("html_element_tag"),
+					text_class_name=field_config.get("text_class_name"),
+					text_class_filter=field_config.get("text_class_filter"),
+					sibling_html_element_value_tag=field_config.get("sibling_html_element_class"),
+					sibling_html_element_value_class=field_config.get("sibling_html_element_value_class"),
+					is_nested=field_config.get("is_nested_text_value")
 				)
 			print(f"Data Value for field {field_config.get('target_field')}: {data_value}")
 			data_record[field_config.get("target_field")] = data_value

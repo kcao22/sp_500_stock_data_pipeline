@@ -5,7 +5,7 @@ from requests.adapters import HTTPAdapter
 
 
 class BeautifulSoupScraper:
-    
+
     def __init__(self, url):
         self.url = url
         self.session = self._create_session()
@@ -43,15 +43,25 @@ class BeautifulSoupScraper:
         except Exception as e:
             raise Exception(f"Get element failed for {html_element_tag}, identifier attribute {identifier_attribute}, and identifier_value {identifier_value} with exception: {e}")
 
-    def get_element_text_value(self, soup_object: BeautifulSoup, html_element_tag: str, text_class_name=None) -> str:
+    def get_element_text_value(
+            self,
+            soup_object: BeautifulSoup,
+            html_element_tag: str,
+            text_class_name: str,
+            text_class_filter: str,
+            sibling_html_element_value_tag: str = None,
+            sibling_html_element_value_class: str = None,
+            is_nested: bool = False
+    ) -> str:
         try:
-            label_span = soup_object.find("span", class_="label", string=lambda s: s and html_element_label in s)
-            if not label_span or not label_span.find_next_sibling():
-                return None
-            value_span = label_span.find_next_sibling("span", class_=text_class_name)
-            if value_span:
-                return value_span.text.strip()
+            label_span = soup_object.find(name=html_element_tag, class_=text_class_name, string=text_class_filter)
+            if label_span:
+                if is_nested:
+                    value_span = label_span.find_next_sibling(name=sibling_html_element_value_tag, class_=sibling_html_element_value_class)
+                    return value_span.text.strip() if value_span else None
+                else:
+                    return label_span.text.strip()
             else:
                 return None
         except Exception as e:
-            raise Exception(f"Error occurred when extracting text value for {html_element_label} and text class name {text_class_name} with exception: {e}")
+            raise Exception(f"Error occurred when extracting text value for {html_element_tag} and text class name {text_class_filter} with label {text_class_filter}.\nException: {e}")
