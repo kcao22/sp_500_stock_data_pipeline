@@ -13,21 +13,23 @@ from airflow.decorators import dag, task
 def dag():
     @task
     def test_get_google_site():
-        scraper = yahoo_finance_utils.yahoo_finance_scraper(
-            url="https://finance.yahoo.com/quote/GOOGL/"
-        )
-        response = scraper.test_get_data()
+        scraper = yahoo_finance_utils.YahooFinanceScraper()
+        response = scraper.test_get_data(url="https://finance.yahoo.com/quote/GOOGL/profile/")
         print(response.prettify())
 
     @task
-    def test_get_config():
-        scraper = yahoo_finance_utils.yahoo_finance_scraper(
-            url="https://finance.yahoo.com/quote/GOOGL/"
-        )
-        scraper.get_daily_data()
+    def test_get_daily_data():
+        scraper = yahoo_finance_utils.YahooFinanceScraper()
+        scraper._get_data(url="https://finance.yahoo.com/quote/GOOGL/")
+
+    @task
+    def test_get_dim_data():
+        scraper = yahoo_finance_utils.YahooFinanceScraper()
+        scraper._get_data(url="https://finance.yahoo.com/quote/GOOGL/profile/")
 
     test_get_google_site()
-    test_get_config()
+    test_get_daily_data()
+    test_get_dim_data()
 
 
 dag()
