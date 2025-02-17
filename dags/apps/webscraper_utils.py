@@ -6,8 +6,7 @@ from requests.adapters import HTTPAdapter
 
 class BeautifulSoupScraper:
 
-    def __init__(self, url):
-        self.url = url
+    def __init__(self):
         self.session = self._create_session()
 
     def _create_session(self):
@@ -31,7 +30,13 @@ class BeautifulSoupScraper:
         except Exception as e:
             raise Exception(f"Failed to request page for {url} after 5 retries with exception:\n{e}") from e
 
-    def get_element_data_value(self, soup_object: BeautifulSoup, html_element_tag: str, identifier_attribute: str, identifier_value: str) -> str:
+    def get_element_data_value(
+            self,
+            soup_object: BeautifulSoup,
+            html_element_tag: str,
+            identifier_attribute: str,
+            identifier_value: str
+    ) -> str:
         try:
             element = soup_object.find(html_element_tag, {identifier_attribute: identifier_value})
             if not element:
@@ -54,14 +59,14 @@ class BeautifulSoupScraper:
             is_nested: bool = False
     ) -> str:
         try:
-            label_span = soup_object.find(name=html_element_tag, class_=text_class_name, string=text_class_filter)
-            if label_span:
+            label_span = soup_object.find(name=html_element_tag, class_=text_class_name, string=lambda text: text and text.strip() == text_class_filter.strip())
+            if not label_span:
+                return None
+            else:
                 if is_nested:
                     value_span = label_span.find_next_sibling(name=sibling_html_element_value_tag, class_=sibling_html_element_value_class)
                     return value_span.text.strip() if value_span else None
                 else:
                     return label_span.text.strip()
-            else:
-                return None
         except Exception as e:
             raise Exception(f"Error occurred when extracting text value for {html_element_tag} and text class name {text_class_filter} with label {text_class_filter}.\nException: {e}")
