@@ -185,3 +185,80 @@ DAILY_EXTRACT_CONFIG = [
 		"is_nested_text_value": True
 	},
 ]
+
+
+DIM_DATA_EXTRACT_CONFIG = [
+	{
+		"target_field": "company_name",
+		"html_element_tag": "h1",
+		"identifier_attribute": "class",
+		"identifier_value": "yf-xxbei9",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_address",
+		"html_element_tag": "div",
+		"identifier_attribute": "class",
+		"identifier_value": "address yf-wxp4ja",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_phone_number",
+		"html_element_tag": "a",
+		"identifier_attribute": "aria-label",
+		"identifier_value": "phone number",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_website",
+		"html_element_tag": "a",
+		"identifier_attribute": "aria-label",
+		"identifier_value": "website link",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_sector",
+		"html_element_tag": "a",
+		"identifier_attribute": "data-ylk",
+		"identifier_value": "elm:itm;elmt:link;itc:0;sec:qsp-company-overview;subsec:profile;slk:Communication%20Services",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_industry",
+		"html_element_tag": "a",
+		"identifier_attribute": "data-ylk",
+		"identifier_value": "elm:itm;elmt:link;itc:0;sec:qsp-company-overview;subsec:profile;slk:Internet%20Content%20%26%20Information",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_full_time_employees",
+		"html_element_tag": "dt",
+		"identifier_attribute": "strong",
+		"identifier_value": "",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_full_time_employees",
+		"html_element_tag": "dt",
+		"text_class_name": "yf-wxp4ja",
+		"text_class_filter": "Full Time Employees:",
+		"sibling_html_element_value_tag": "dd",
+		"sibling_html_element_value_class": None,
+		"is_text_value": True,
+		"is_nested_text_value": True
+	},
+	{
+		"target_field": "company_description",
+		"html_element_tag": "section",
+		"identifier_attribute": "data-testid",
+		"identifier_value": "description",
+		"is_data_value": True
+	},
+	{
+		"target_field": "company_corporate_governance_score",
+		"html_element_tag": "section",
+		"identifier_attribute": "data-testid",
+		"identifier_value": "corporate-governance",
+		"is_data_value": True
+	}
+]
