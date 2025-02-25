@@ -8,18 +8,18 @@ from airflow.decorators import dag, task
     dag_id=af_utils.get_dag_name(dag_file_path=__file__),
     default_args=af_utils.get_default_args(),
     start_date=pendulum.datetime(year=2025, month=1, day=11),
-    schedule="0 19 * * *",
+    schedule="0 7 * * 7",
     catchup=False,
-    tags=["data_source: yahoo", "schedule: daily"],
+    tags=["data_source: yahoo", "schedule: weekly"],
 )
 def dag():
 
     @task
-    def get_daily_data():
+    def get_weekly_dim_data():
         scraper = yahoo_finance_utils.YahooFinanceScraper()
-        scraper._get_data(url="https://finance.yahoo.com/quote/GOOGL/")
+        scraper._get_data(url="https://finance.yahoo.com/quote/GOOGL/profile/")
 
-    get_daily_data()
+    get_weekly_dim_data()
 
 
 dag()
