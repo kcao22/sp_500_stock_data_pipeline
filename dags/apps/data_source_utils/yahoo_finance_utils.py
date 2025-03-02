@@ -1,6 +1,9 @@
+import pandas
+import pendulum
 import time
 from typing import Dict, List
 
+from apps import s3
 from apps.webscraper_utils import BeautifulSoupScraper
 from apps.data_source_utils import yahoo_finance_config
 
@@ -64,30 +67,46 @@ class YahooFinanceScraper(BeautifulSoupScraper):
                 ) from e
         return data_record
 
-    def get_daily_data(self) -> List:
+    def extract_daily_data(self) -> List:
         """
         Extracts daily data for all companies listed in yahoo_finance_config's SP_500_SYMBOLS_CONFIG list.
-        @return: A list of dictionaries mapping the specified config target keys to corresponding values extracted from the URL.
+        @return: None
         """
         daily_data = []
-        for company_symbol in self.config.SP_500_SYMBOLS_CONFIG:
+        file_path = f"/data_sources/yahoo_finance/daily_sp_500/{pendulum.now().format('YYYYMMDD-HHmmss')}/sp_500_daily_{pendulum.now().format('YYYYMMDD')}.csv"
+        for company_config in self.config.SP_500_CONFIG:
             daily_data.append(
-                self._get_data(url=f"https://finance.yahoo.com/quote/{company_symbol}/")
+                self._get_data(url=f"https://finance.yahoo.com/quote/{company_config.get('symbol')}/")
             )
             time.sleep(1)
-        return daily_data
+        df = pandas.DataFrame(daily_data)
+        s3.put_object(
+            is_test=True,
+            target_bucket="ingress",
+            key=file_path,
+            data=df.to_csv(index=False)
+        )
+        return file_path
 
-    def get_dim_data(self) -> List:
+    def extract_dim_data(self) -> List:
         """
         Extracts dimension table data for all companies listed in yahoo_finance_config's SP_500_SYMBOLS_CONFIG list.
-        @return: List of dictionaries mapping the specified dimensional config keys to corresponding values extracted from the URL.
+        @return: None
         """
         dim_data = []
-        for company_symbol in self.config.SP_500_SYMBOLS_CONFIG:
+        file_path = f"/data_sources/yahoo_finance/weekly_sp_500/{pendulum.now().format('YYYYMMDD-HHmmss')}/sp_500_weekly_{pendulum.now().format('YYYYMMDD')}.csv"
+        for company_config in self.config.SP_500_CONFIG:
             dim_data.append(
                 self._get_data(
-                    url=f"https://finance.yahoo.com/quote/{company_symbol}/profile/"
+                    url=f"https://finance.yahoo.com/quote/{company_config.get('symbol')}/profile/"
                 )
             )
             time.sleep(1)
-        return dim_data
+        df = pandas.DataFrame(dim_data)
+        s3.put_object(
+            is_test=True,
+            target_bucket="ingress",
+            key=file_path,
+            data=df.to_csv(index=False)
+        )
+        return file_path
