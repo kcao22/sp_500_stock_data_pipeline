@@ -107,6 +107,6 @@ class YahooFinanceScraper(BeautifulSoupScraper):
             is_test=True,
             target_bucket="s3_ingress",
             key=file_path,
-            data=df.to_csv(index=False)
+            body=df.to_csv(index=False)
         )
         return file_path
