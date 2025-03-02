@@ -82,7 +82,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         df = pandas.DataFrame(daily_data)
         s3.put_object(
             is_test=True,
-            target_bucket="ingress",
+            target_bucket="s3_ingress",
             key=file_path,
             data=df.to_csv(index=False)
         )
@@ -105,7 +105,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         df = pandas.DataFrame(dim_data)
         s3.put_object(
             is_test=True,
-            target_bucket="ingress",
+            target_bucket="s3_ingress",
             key=file_path,
             data=df.to_csv(index=False)
         )

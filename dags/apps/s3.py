@@ -7,9 +7,11 @@ from airflow.models import Variable
 def _choose_s3_bucket(is_test: bool, bucket: str):
     if is_test:
         match bucket.lower():
-            case "ingress":
-                return f""
-                
+            case "s3_ingress":
+                return "ingress"
+            case "s3_archive":
+                return "archive"
+
 
 def put_object(is_test: bool, target_bucket: str, key: str, body: str, **kwargs) -> None:
     """
@@ -38,7 +40,7 @@ def put_object(is_test: bool, target_bucket: str, key: str, body: str, **kwargs)
                 aws_secret_access_key=Variable.get("AWS_SECRET_ACCESS_KEY"),
             )
             client.put_object(
-                Bucket=target_bucket,
+                Bucket=_choose_s3_bucket(is_test=is_test, bucket=target_bucket),
                 Key=key,
                 Body=body
             )
