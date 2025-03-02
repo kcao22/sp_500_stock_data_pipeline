@@ -17,7 +17,7 @@ def dag():
     @task
     def get_daily_data():
         scraper = yahoo_finance_utils.YahooFinanceScraper()
-        scraper._get_data(url="https://finance.yahoo.com/quote/GOOGL/")
+        scraper.extract_daily_data(url="https://finance.yahoo.com/quote/GOOGL/")
 
     get_daily_data()
 

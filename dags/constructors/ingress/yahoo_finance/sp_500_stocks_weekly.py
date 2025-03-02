@@ -17,7 +17,7 @@ def dag():
     @task
     def get_weekly_dim_data():
         scraper = yahoo_finance_utils.YahooFinanceScraper()
-        scraper._get_data(url="https://finance.yahoo.com/quote/GOOGL/profile/")
+        scraper.extract_dim_data(url="https://finance.yahoo.com/quote/GOOGL/profile/")
 
     get_weekly_dim_data()
 
