@@ -13,11 +13,6 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         self.config = yahoo_finance_config
         super().__init__()
 
-    def test_get_data(self, url: str):
-        return super().request_webpage(
-            url="https://finance.yahoo.com/quote/GOOGL/profile/"
-        )
-
     def _get_data(self, url: str) -> Dict:
         """
         Extracts a single company's data based on the url argument.
