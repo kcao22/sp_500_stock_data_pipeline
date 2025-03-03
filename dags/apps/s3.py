@@ -25,13 +25,16 @@ def put_object(is_test: bool, target_bucket: str, key: str, body: str, **kwargs)
     """
     if is_test:
         try:
+            if key.startswith("/"):
+                key = key[1:]
             file_path = os.path.join("/opt/airflow/files/", key)
+            print(f"Key: {key}")
             if not os.path.exists(file_path):
                 os.makedirs(name=os.path.dirname(file_path), exist_ok=True)
             with open(file_path, "wb") as f:
                 f.write(body)
         except Exception as e:
-            raise Exception(f"Failed to put object to target bucket {target_bucket} with object path {key}.")
+            raise Exception(f"Failed to put object to target bucket {target_bucket} with object path {key}. Exception: {e}")
     else:
         try:
             client = boto3.client(

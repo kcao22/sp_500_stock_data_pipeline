@@ -168,3 +168,4 @@ logs/
 docker/dbt/star/dbt_packages/*
 .vscode/settings.json
 dags/apps/variables.json
+/files

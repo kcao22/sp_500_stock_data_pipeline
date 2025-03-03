@@ -1,7 +1,10 @@
 import pendulum
-from apps import af_utils
-from apps.data_source_utils import yahoo_finance_utils
+import time
 from airflow.decorators import dag, task
+from airflow.utils.task_group import TaskGroup
+from airflow.models.baseoperator import chain
+from apps import af_utils
+from apps.data_source_utils import yahoo_finance_utils, yahoo_finance_config
 
 
 @dag(
@@ -15,11 +18,20 @@ from airflow.decorators import dag, task
 def dag():
 
     @task
-    def get_daily_data():
+    def get_daily_data(symbol: str):
         scraper = yahoo_finance_utils.YahooFinanceScraper()
-        scraper.extract_daily_data(url="https://finance.yahoo.com/quote/GOOGL/")
+        scraper.extract_daily_data(symbol=symbol)
 
-    get_daily_data()
+    task_groups = []
+
+    for company in yahoo_finance_config.SP_500_CONFIG:
+        company_symbol = company["symbol"]
+        with TaskGroup(group_id=company_symbol) as tg:
+            get_daily_data(symbol=company_symbol)
+        task_groups.append(tg)
+        time.sleep(1)
+
+    chain(*task_groups)
 
 
 dag()

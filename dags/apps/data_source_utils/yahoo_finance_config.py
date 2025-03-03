@@ -4,7 +4,7 @@ SP_500_CONFIG = [
 	# {"symbol": "MSFT", "name": "Microsoft Corporation"},
 	# {"symbol": "AMZN", "name": "Amazon.com, Inc."},
 	{"symbol": "GOOGL", "name": "Alphabet Inc."},
-	# {"symbol": "GOOG", "name": "Alphabet Inc."},
+	{"symbol": "GOOG", "name": "Alphabet Inc."},
 	# {"symbol": "META", "name": "Meta Platforms, Inc."},
 	# {"symbol": "TSLA", "name": "Tesla, Inc."},
 	# {"symbol": "AVGO", "name": "Broadcom Inc."},
