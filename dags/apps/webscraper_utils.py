@@ -1,3 +1,4 @@
+import random
 import requests
 from bs4 import BeautifulSoup
 from urllib3.util.retry import Retry
@@ -18,9 +19,19 @@ class BeautifulSoupScraper:
         session.mount('https://', HTTPAdapter(max_retries=retries))
         return session
 
+        def _get_random_user_agent(self) -> str:
+            user_agents = [
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:54.0) Gecko/20100101 Firefox/54.0',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.112 Safari/537.36',
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.116 Safari/537.36',
+            ]
+            return random.choice(user_agents)
+
     def request_webpage(self, url: str, **kwargs) -> BeautifulSoup:
         try:
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"}
+            headers = {"User-Agent": self._get_random_user_agent()}
             response = self.session.get(
                 url=url,
                 headers=headers,

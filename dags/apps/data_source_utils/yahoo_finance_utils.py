@@ -1,5 +1,6 @@
 import pandas
 import pendulum
+import time
 from typing import Dict
 
 from apps import s3
@@ -10,12 +11,13 @@ from apps.data_source_utils import yahoo_finance_config
 class YahooFinanceScraper(BeautifulSoupScraper):
     def __init__(self):
         self.config = yahoo_finance_config
+        self.timestamp_str = pendulum.now().format("YYYYMMDD-HHmmss")
         super().__init__()
 
     def _get_data(self, url: str) -> Dict:
         """
         Extracts a single company's data based on the url argument.
-        @param url: The yahoo finance URL for a company's stock. Should follow a format of https://finance.yahoo.com/quote/{sp_500_symbol}/
+        @param url: The yahoo finance URL for a company's stock. Should follow a format of https://finance.yahoo.com/quote/{sp_500_symbol}/ or https://finance.yahoo.com/quote/{sp_500_symbol}/profile/.
         @return: A dictionary mapping the specified config target keys to corresponding values extracted from the URL.
         """
         soup = super().request_webpage(url=url)
@@ -61,30 +63,28 @@ class YahooFinanceScraper(BeautifulSoupScraper):
                 ) from e
         return data_record
 
-    def extract_daily_data(self, symbol: str) -> str:
+    def extract_companies_data(self, daily_or_weekly: str, symbols: list) -> str:
         """
         Extracts daily data for all companies listed in yahoo_finance_config's SP_500_SYMBOLS_CONFIG list.
-        @return: None
+        :param daily_or_weekly: String representation of if daily extract of data or weekly extract of data.
+        :param symbols: List of symbols to extract daily data for.
+        @return: File path of extracted data.
         """
-        file_path = f"/data_sources/yahoo_finance/daily/{symbol}/{pendulum.now().format('YYYYMMDD-HHmmss')}/{symbol}_{pendulum.now().format('YYYYMMDD')}.csv"
-        daily_data = self._get_data(url=f"https://finance.yahoo.com/quote/{symbol}/")
-        df = pandas.DataFrame([daily_data])
-        s3.put_object(
-            is_test=True,
-            bucket="s3_ingress",
-            key=file_path,
-            body=df.to_csv(index=False).encode()
-        )
-        return file_path
+        scope = ""
+        if daily_or_weekly.lower() not in ("daily", "weekly"):
+            raise ValueError(
+                f"Invalid daily_or_weekly argument value: {daily_or_weekly}. Must be either 'daily' or 'weekly'."
+            )
+        else:
+            scope = daily_or_weekly.lower()
 
-    def extract_dim_data(self, symbol: str) -> str:
-        """
-        Extracts dimension table data for all companies listed in yahoo_finance_config's SP_500_SYMBOLS_CONFIG list.
-        @return: None
-        """
-        file_path = f"/data_sources/yahoo_finance/weekly/{symbol}/{pendulum.now().format('YYYYMMDD-HHmmss')}/{symbol}_{pendulum.now().format('YYYYMMDD')}.csv"
-        dim_data = self._get_data(url=f"https://finance.yahoo.com/quote/{symbol}/profile/")
-        df = pandas.DataFrame([dim_data])
+        file_path = f"/data_sources/yahoo_finance/{scope}/{self.timestamp_str}/{scope}_{self.timestamp_str}.csv"
+        companies_data = []
+        for symbol in symbols:
+            url = f"https://finance.yahoo.com/quote/{symbol}/{'profile/' if scope == 'weekly' else ''}"
+            companies_data.append(self._get_data(url=url))
+            time.sleep(2)
+        df = pandas.DataFrame(companies_data)
         s3.put_object(
             is_test=True,
             bucket="s3_ingress",

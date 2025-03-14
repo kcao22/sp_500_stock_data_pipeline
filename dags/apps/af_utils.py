@@ -16,6 +16,7 @@ def get_default_args() -> dict:
         "retries": 1
     }
 
+
 def get_dag_name(dag_file_path: str) -> str:
     """
     Generates a DAG name based on the file path of DAG.
