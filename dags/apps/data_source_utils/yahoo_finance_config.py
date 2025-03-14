@@ -1,8 +1,8 @@
 SP_500_CONFIG = [
-	# {"symbol": "AAPL", "name": "Apple Inc."},
-	# {"symbol": "NVDA", "name": "NVIDIA Corporation"},
-	# {"symbol": "MSFT", "name": "Microsoft Corporation"},
-	# {"symbol": "AMZN", "name": "Amazon.com, Inc."},
+	{"symbol": "AAPL", "name": "Apple Inc."},
+	{"symbol": "NVDA", "name": "NVIDIA Corporation"},
+	{"symbol": "MSFT", "name": "Microsoft Corporation"},
+	{"symbol": "AMZN", "name": "Amazon.com, Inc."},
 	{"symbol": "GOOGL", "name": "Alphabet Inc."},
 	{"symbol": "GOOG", "name": "Alphabet Inc."},
 	# {"symbol": "META", "name": "Meta Platforms, Inc."},

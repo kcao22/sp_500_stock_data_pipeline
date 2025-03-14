@@ -38,5 +38,7 @@ def dag():
 
         return scraper.extract_companies_data(daily_or_weekly="daily", symbols=symbols)
 
+    get_daily_data()
+
 
 dag()
