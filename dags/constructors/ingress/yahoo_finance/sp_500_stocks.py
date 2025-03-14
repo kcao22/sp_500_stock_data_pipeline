@@ -34,7 +34,7 @@ def dag():
         if context["params"]["companies"]:
             symbols = context["params"]["companies"].split(",")
         else:
-            symbols = list(yahoo_finance_config.SP_500_CONFIG.keys())
+            symbols = [company.get("symbol") for company in yahoo_finance_config.SP_500_CONFIG]
 
         return scraper.extract_companies_data(daily_or_weekly="daily", symbols=symbols)
 
