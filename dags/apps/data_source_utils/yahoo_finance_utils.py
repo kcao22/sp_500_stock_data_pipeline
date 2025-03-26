@@ -14,14 +14,17 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         self.timestamp_str = pendulum.now().format("YYYYMMDD-HHmmss")
         super().__init__()
 
-    def _get_data(self, url: str) -> Dict:
+    def _get_data(self, symbol: str, scope: str) -> Dict:
         """
-        Extracts a single company's data based on the url argument.
-        @param url: The yahoo finance URL for a company's stock. Should follow a format of https://finance.yahoo.com/quote/{sp_500_symbol}/ or https://finance.yahoo.com/quote/{sp_500_symbol}/profile/.
+        Extracts a single company's data based on the company's stock name and scope (daily data or weekly dim data).
+        @param symbol: The company's stock identifier. 
+        @param scope: The scope of the extract - either daily or weekly.
+
         @return: A dictionary mapping the specified config target keys to corresponding values extracted from the URL.
         """
+        url = f"https://finance.yahoo.com/quote/{symbol}/{'profile/' if scope == 'weekly' else ''}"
         soup = super().request_webpage(url=url)
-        data_record = {}
+        data_record = {"symbol": symbol}
         extract_config = (
             self.config.DIM_DATA_EXTRACT_CONFIG
             if url.endswith("profile/")
@@ -81,8 +84,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         file_path = f"/data_sources/yahoo_finance/{scope}/{self.timestamp_str}/{scope}_{self.timestamp_str}.csv"
         companies_data = []
         for symbol in symbols:
-            url = f"https://finance.yahoo.com/quote/{symbol}/{'profile/' if scope == 'weekly' else ''}"
-            companies_data.append(self._get_data(url=url))
+            companies_data.append(self._get_data(symbol=symbol, scope=scope))
             time.sleep(2)
         df = pandas.DataFrame(companies_data)
         s3.put_object(
