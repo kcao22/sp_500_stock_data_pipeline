@@ -1,12 +1,19 @@
 stock_transaction_streaming_profile:
-  target: prod
+  target: dev
   outputs:
+    dev:
+      type: postgres
+      host: "{{ env_var('POSTGRES_SERVER') }}"
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      port: "{{ env_var('POSTGRES_PORT') }}"
+      dbname: "{{ env_var('POSTGRES_DB') }}"
+      schema: "{{ env_var('POSTGRES_DEV_SCHEMA') }}"
     prod:
       type: postgres
-      threads: 1
-      host: data-warehouse
-      port: 5432
-      user: ${POSTGRES_USER}
-      pass: ${POSTGRES_PASSWORD}
-      dbname: ${POSTGRES_DB}
-      schema: ${POSTGRES_SCHEMA}
+      host: "{{ env_var('POSTGRES_SERVER') }}"
+      user: "{{ env_var('POSTGRES_USER') }}"
+      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      port: "{{ env_var('POSTGRES_PORT') }}"
+      dbname: "{{ env_var('POSTGRES_DB') }}"
+      schema: "{{ env_var('POSTGRES_PROD_SCHEMA') }}"
