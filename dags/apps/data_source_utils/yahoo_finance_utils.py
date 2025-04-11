@@ -24,7 +24,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         """
         url = f"https://finance.yahoo.com/quote/{symbol}/{'profile/' if scope == 'weekly' else ''}"
         soup = super().request_webpage(url=url)
-        data_record = {"symbol": symbol}
+        data_record = {"symbol": symbol, "load_timestamp_utc": pendulum.now(tz="UTC").to_iso8601_string()}
         extract_config = (
             self.config.DIM_DATA_EXTRACT_CONFIG
             if url.endswith("profile/")
