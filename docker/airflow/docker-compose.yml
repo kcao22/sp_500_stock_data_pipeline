@@ -249,6 +249,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - data-warehouse-volume:/var/lib/postgresql/data
+      - ${AIRFLOW_PROJ_DIR:-.}/migrations:/docker-entrypoint-initdb.d
       - ./warehouse_pg_hba.conf:/usr/share/postgresql/13/pg_hba.conf
     networks:
       - default_net
