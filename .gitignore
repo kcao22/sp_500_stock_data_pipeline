@@ -170,3 +170,4 @@ docker/dbt/star/dbt_packages/*
 dags/apps/variables.json
 /files
 terraform/terraform.tfvars
+terraform/variables.tf
