@@ -241,16 +241,6 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
-    ports:
-      - "5050:80"
-    networks:
-      - default_net
-
 # Networks
 networks: 
   default_net: 

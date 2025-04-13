@@ -5,30 +5,31 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=s3,redshift, iam
+      - SERVICES=s3,redshift, iam, ec2
       - DEBUG=1
     volumes:
-      - "${AIRFLOW_PROJ_DIR}/localstack-data}:/var/lib/localstack"
+      - "${AIRFLOW_PROJ_DIR}/localstack-data:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
     networks:
       - default_net
 
-  # terraform:
-  #   image: hashicorp/terraform:1.1.1
-  #   container_name: terraform
-  #   working_dir: /workspace
-  #   volumes:
-  #     - ${AIRFLOW_PROJ_DIR}/terraform:/workspace
-  #   entrypoint: ["terraform"]
-  #   depends_on:
-  #     - localstack
-  #   networks:
-  #     - default_net
-  #   healthcheck:
-  #     test: ["CMD", "curl", "--fail", "http://localstack:4566/health"]
-  #     interval: 10s
-  #     retries: 5
-  #     start_period: 5s
+  terraform:
+    image: hashicorp/terraform:1.1.1
+    container_name: terraform
+    working_dir: /workspace
+    volumes:
+      - ${AIRFLOW_PROJ_DIR}/terraform:/workspace
+    entrypoint: ["terraform"]
+    depends_on:
+      - localstack
+    networks:
+      - default_net
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localstack:4566/health"]
+      interval: 10s
+      retries: 5
+      start_period: 5s
+    command: ["/bin/sh", "-c", "terraform init && terraform apply -auto-approve"]
 
   # flyway:
   #   image: flyway/flyway

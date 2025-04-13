@@ -171,3 +171,4 @@ dags/apps/variables.json
 /files
 terraform/terraform.tfvars
 terraform/variables.tf
+/localstack-data
