@@ -1,5 +1,4 @@
 import os
-import psycopg2
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -8,12 +7,6 @@ def create_postgres_engine(user: str, password: str, server: str, port: int, db:
     """
     Creates a SQLAlchemy engine for connecting to local postgres warehouse.
     """
-    print(f"POSTGRES_USER: {user}")
-    print(f"POSTGRES_PASSWORD: {password}")
-    print(f"POSTGRES_SERVER: {server}")
-    print(f"POSTGRES_PORT: {port}")
-    print(f"POSTGRES_DB: {db}")
-
     return create_engine(
         url=f"postgresql+psycopg2://{user}:{password}@{server}:{port}/{db}"
     )

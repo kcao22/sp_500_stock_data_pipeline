@@ -3,4 +3,4 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends
 WORKDIR /usr/app/dbt/star
 RUN pip install --upgrade pip
-RUN pip install dbt-core==1.9.1 dbt-postgres==1.9.0
+RUN pip install dbt-core==1.9.1 dbt-redshift==1.9.0

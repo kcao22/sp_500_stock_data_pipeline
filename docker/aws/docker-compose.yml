@@ -1,0 +1,54 @@
+services:
+  localstack:
+    image: localstack/localstack:4.3.0
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3,redshift, iam
+      - DEBUG=1
+    volumes:
+      - "${AIRFLOW_PROJ_DIR}/localstack-data}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    networks:
+      - default_net
+
+  # terraform:
+  #   image: hashicorp/terraform:1.1.1
+  #   container_name: terraform
+  #   working_dir: /workspace
+  #   volumes:
+  #     - ${AIRFLOW_PROJ_DIR}/terraform:/workspace
+  #   entrypoint: ["terraform"]
+  #   depends_on:
+  #     - localstack
+  #   networks:
+  #     - default_net
+  #   healthcheck:
+  #     test: ["CMD", "curl", "--fail", "http://localstack:4566/health"]
+  #     interval: 10s
+  #     retries: 5
+  #     start_period: 5s
+
+  # flyway:
+  #   image: flyway/flyway
+  #   environment:
+  #     FLYWAY_USER: ${POSTGRES_USER}
+  #     FLYWAY_PASSWORD: ${POSTGRES_PASSWORD}
+  #     FLYWAY_URL: jdbc:postgresql://data-warehouse:${POSTGRES_WAREHOUSE_LOCAL_PORT}/${POSTGRES_DB}
+  #   volumes:
+  #     - ${AIRFLOW_PROJ_DIR:-.}/migrations:/flyway/sql
+  #   depends_on:
+  #     - terraform
+  #   healthcheck:
+  #     test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+  #     interval: 10s
+  #     retries: 5
+  #     start_period: 5s
+  #   networks:
+  #     - default_net
+
+# Networks
+networks: 
+  default_net: 
+    driver: bridge
