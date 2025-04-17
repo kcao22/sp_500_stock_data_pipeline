@@ -9,6 +9,16 @@ terraform {
 
 provider "aws" {
   region = var.region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+  # Local stack configuration
+  skip_credentials_validation = true
+  skip_metadata_api_check     = true
+  endpoints {
+    s3                      = "http://localstack:4566"
+    iam                     = "http://localstack:4566"
+    redshiftserverless      = "http://localstack:4566"
+  }
 }
 
 # S3 Ingress bucket
@@ -22,7 +32,7 @@ resource "aws_s3_bucket" "prod_s3_ingress_bucket" {
 
 # S3 Archive bucket
 resource "aws_s3_bucket" "prod_s3_archive_bucket" {
-  bucket        = var.ingress_bucket_name
+  bucket        = var.archive_bucket_name
   bucket_prefix = "prod_"
   force_destroy = true
   tags = {
@@ -74,8 +84,8 @@ resource "aws_iam_policy" "prod_s3_redshift_serverless_rw_policy" {
 
 
 # Attach S3 access policy to prod_s3_redshift_serverless_role
-resource "aws_iam_role_policy_attachment" "prod_s3_redshift_policy_attachment" {
-  role       = aws_iam_role.prod_s3_redshift_role.name
+resource "aws_iam_role_policy_attachment" "prod_s3_redshift_serverless_policy_attachment" {
+  role       = aws_iam_role.prod_redshift_serverless_role.name
   policy_arn = aws_iam_policy.prod_s3_redshift_serverless_rw_policy.arn
 }
 
