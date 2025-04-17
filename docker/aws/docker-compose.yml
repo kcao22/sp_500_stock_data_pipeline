@@ -13,23 +13,6 @@ services:
     networks:
       - default_net
 
-  terraform:
-    image: hashicorp/terraform:1.1.1
-    container_name: terraform
-    working_dir: /workspace
-    volumes:
-      - ${AIRFLOW_PROJ_DIR}/terraform:/workspace
-    depends_on:
-      - localstack
-    networks:
-      - default_net
-    healthcheck:
-      test: [ "CMD", "curl", "--fail", "http://localstack:4566/health" ]
-      interval: 10s
-      retries: 5
-      start_period: 5s
-    # command: [ "terraform init && terraform apply -auto-approve" ]
-
   # flyway:
   #   image: flyway/flyway
   #   environment:
