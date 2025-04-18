@@ -174,3 +174,4 @@ terraform/variables.tf
 /localstack-data
 terraform/.terraform/
 terraform/.terraform.lock.hcl
+terraform.tfstate

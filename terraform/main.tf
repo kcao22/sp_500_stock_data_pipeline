@@ -12,6 +12,7 @@ provider "aws" {
   access_key = var.aws_access_key
   secret_key = var.aws_secret_key
   # Local stack configuration
+  skip_requesting_account_id = true
   skip_credentials_validation = true
   skip_metadata_api_check     = true
   endpoints {
@@ -33,7 +34,6 @@ resource "aws_s3_bucket" "prod_s3_ingress_bucket" {
 # S3 Archive bucket
 resource "aws_s3_bucket" "prod_s3_archive_bucket" {
   bucket        = var.archive_bucket_name
-  bucket_prefix = "prod_"
   force_destroy = true
   tags = {
     Name = "Prod S3 Archive"
