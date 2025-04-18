@@ -2,7 +2,7 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "5.31.0"
+      version = "5.95.0"
     }
   }
 }
@@ -91,12 +91,12 @@ resource "aws_iam_role_policy_attachment" "prod_s3_redshift_serverless_policy_at
 
 
 # Prod Redshift cluster
-resource "aws_vpc" "prod_redshift_vpc" {
+resource "aws_vpc" "prod_redshift_serverless_vpc" {
   cidr_block = "10.0.0.0/16"
 }
 
 resource "aws_subnet" "prod_redshift_subnet" {
-  vpc_id                  = aws_vpc.prod_redshift_vpc.id
+  vpc_id                  = aws_vpc.prod_redshift_serverless_vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = var.region
   map_public_ip_on_launch = true
@@ -105,7 +105,7 @@ resource "aws_subnet" "prod_redshift_subnet" {
 resource "aws_security_group" "prod_redshift_sg" {
   name        = "allow-all-redshift"
   description = "Allow all inbound access"
-  vpc_id      = aws_vpc.redshift_vpc.id
+  vpc_id      = aws_vpc.prod_redshift_serverless_vpc.id
 
   ingress {
     from_port   = 0
