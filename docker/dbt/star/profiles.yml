@@ -6,7 +6,7 @@ stock_transaction_streaming_profile:
       host: "{{ env_var('POSTGRES_SERVER') }}"
       user: "{{ env_var('POSTGRES_USER') }}"
       password: "{{ env_var('POSTGRES_PASSWORD') }}"
-      port: "{{ env_var('POSTGRES_PORT') }}"
+      port: 5433
       dbname: "{{ env_var('POSTGRES_DB') }}"
       schema: "{{ env_var('POSTGRES_DEV_SCHEMA') }}"
     prod:
@@ -14,6 +14,6 @@ stock_transaction_streaming_profile:
       host: "{{ env_var('POSTGRES_SERVER') }}"
       user: "{{ env_var('POSTGRES_USER') }}"
       password: "{{ env_var('POSTGRES_PASSWORD') }}"
-      port: "{{ env_var('POSTGRES_PORT') }}"
+      port: 5433
       dbname: "{{ env_var('POSTGRES_DB') }}"
       schema: "{{ env_var('POSTGRES_PROD_SCHEMA') }}"
