@@ -40,3 +40,84 @@ def execute_query(query: str, is_test: bool):
         raise Exception(f"Failed to execute query: {query} with Exception: {e}") from e
     finally:
         session.close()
+
+def load_file_to_table(file_path: str, target_schema: str, target_table: str, copy_options: list, is_test):
+    if is_test:
+        try:
+            information_schema_query = f"""
+                SELECT
+                    column_name
+                FROM 
+                    INFORMATION_SCHEMA.COLUMNS
+                WHERE
+                    table_schema = {target_schema}
+                    AND table_name = {target_table}
+                ORDER BY 
+                    ordinal_position ASC
+            """
+            columns = execute_query(
+                query=information_schema_query,
+                is_test=is_test
+            )
+            column_names =",".joi([column[0] for column in columns])
+            copy_query = f"""
+                COPY {target_schema}.{target_table} ({column_names})
+                FROM '{file_path}'
+                f{'\n'.join(copy_option for copy_option in copy_options)}
+            """
+            execute_query(
+                query=copy_query,
+                is_test=is_test
+            )
+        except Exception as e:
+            raise Exception(f"Failed to load file to {target_schema}.{target_table} with Exception: {e}") from e
+
+def ingress_to_ods(operation: str, source_schema: str, source_table: str, target_schema: str, target_table: str, is_test: bool):
+    if operation == "insert":
+        try:
+            insert_query = f"""
+                INSERT INTO {target_schema}.{target_table}
+                SELECT * FROM {source_schema}.{source_table}
+            """
+            execute_query(
+                query=insert_query,
+                is_test=is_test
+            )
+        except Exception as e:
+            raise Exception(f"Failed to insert data from {source_schema}.{source_table} to {target_schema}.{target_table} with Exception: {e}") from e
+    elif operation == "replace":
+        try:
+            delete_query = f"""
+                DELETE FROM {target_schema}.{target_table};
+            """
+            execute_query(
+                query=delete_query,
+                is_test=is_test
+            )
+            insert_query = f"""
+                INSERT INTO {target_schema}.{target_table}
+                SELECT * FROM {source_schema}.{source_table}
+            """
+            execute_query(
+                query=insert_query,
+                is_test=is_test
+            )
+        except Exception as e:
+            raise Exception(f"Failed to replace data in {target_schema}.{target_table} with Exception: {e}") from e
+    elif operation == "upsert":
+        try:
+            
+            upsert_query = f"""
+                UPDATE {target_schema}.{target_table} AS target
+                SET column_name = source.column_name
+                FROM {source_schema}.{source_table} AS source
+                WHERE target.id = source.id
+            """
+            execute_query(
+                query=update_query,
+                is_test=is_test
+            )
+        except Exception as e:
+            raise Exception(f"Failed to update data in {target_schema}.{target_table} with Exception: {e}") from e
+    else:
+        raise ValueError(f"Invalid operation: {operation}. Must be either 'insert' or 'update'.")

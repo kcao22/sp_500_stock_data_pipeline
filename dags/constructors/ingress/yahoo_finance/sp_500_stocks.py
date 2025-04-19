@@ -38,6 +38,10 @@ def dag():
 
         return scraper.extract_companies_data(daily_or_weekly="daily", symbols=symbols)
 
+    @task
+    def load_daily_data_to_ingress(file_path=str):
+        
+
     get_daily_data()
 
 
