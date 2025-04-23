@@ -11,6 +11,7 @@ def create_postgres_engine(user: str, password: str, server: str, port: int, db:
         url=f"{'postgresql' if is_test else 'redshift'}+psycopg2://{user}:{password}@{server}:{port}/{db}"
     )
 
+
 def create_postgres_connection(is_test: bool):
     """
     Creates a connection to the Postgres database.
@@ -41,38 +42,41 @@ def execute_query(query: str, is_test: bool):
     finally:
         session.close()
 
-def load_file_to_table(file_path: str, target_schema: str, target_table: str, copy_options: list, is_test):
-    if is_test:
-        try:
-            information_schema_query = f"""
-                SELECT
-                    column_name
-                FROM 
-                    INFORMATION_SCHEMA.COLUMNS
-                WHERE
-                    table_schema = {target_schema}
-                    AND table_name = {target_table}
-                ORDER BY 
-                    ordinal_position ASC
-            """
-            columns = execute_query(
-                query=information_schema_query,
-                is_test=is_test
-            )
-            column_names =",".joi([column[0] for column in columns])
-            copy_query = f"""
-                COPY {target_schema}.{target_table} ({column_names})
-                FROM '{file_path}'
-                f{'\n'.join(copy_option for copy_option in copy_options)}
-            """
-            execute_query(
-                query=copy_query,
-                is_test=is_test
-            )
-        except Exception as e:
-            raise Exception(f"Failed to load file to {target_schema}.{target_table} with Exception: {e}") from e
 
-def ingress_to_ods(operation: str, source_schema: str, source_table: str, target_schema: str, target_table: str, is_test: bool):
+def load_file_to_table(file_path: str, target_schema: str, target_table: str, copy_options: list, redshift_copy_options: list, is_test: bool):
+    try:
+        information_schema_query = f"""
+            SELECT
+                column_name
+            FROM 
+                INFORMATION_SCHEMA.COLUMNS
+            WHERE
+                table_schema = {target_schema}
+                AND table_name = {target_table}
+            ORDER BY 
+                ordinal_position ASC
+        """
+        columns = execute_query(
+            query=information_schema_query,
+            is_test=is_test
+        )
+        column_names = ",".joi([column[0] for column in columns])
+        copy_options = "\n".join(copy_option for copy_option in copy_options)
+        redshift_copy_options = "\n".join(redshift_copy_option for redshift_copy_option in redshift_copy_options)
+        copy_query = f"""
+            COPY {target_schema}.{target_table} ({column_names})
+            FROM '{file_path}'
+            {copy_options if is_test else redshift_copy_options}
+        """
+        execute_query(
+            query=copy_query,
+            is_test=is_test
+        )
+    except Exception as e:
+        raise Exception(f"Failed to load file to {target_schema}.{target_table} with Exception: {e}") from e
+
+
+def ingress_to_staging(operation: str, source_schema: str, source_table: str, target_schema: str, target_table: str, is_test: bool):
     if operation == "insert":
         try:
             insert_query = f"""
@@ -106,7 +110,22 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
             raise Exception(f"Failed to replace data in {target_schema}.{target_table} with Exception: {e}") from e
     elif operation == "upsert":
         try:
-            
+            information_schema_query = f"""
+                SELECT
+                    column_name,
+                    data_type
+                FROM 
+                    INFORMATION_SCHEMA.COLUMNS
+                WHERE
+                    table_schema = {target_schema}
+                    AND table_name = {target_table}
+                ORDER BY 
+                    ordinal_position ASC
+            """
+        columns = execute_query(
+            query=information_schema_query,
+            is_test=is_test
+        )
             upsert_query = f"""
                 UPDATE {target_schema}.{target_table} AS target
                 SET column_name = source.column_name
