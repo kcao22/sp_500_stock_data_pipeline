@@ -5,12 +5,24 @@ from airflow.models import Variable
 
 
 def _choose_s3_bucket(is_test: bool, bucket: str):
+    print(f"Is Test: {is_test}")
+    print(f"Bucket: {bucket}")
     if is_test:
         match bucket.lower():
             case "s3_ingress":
                 return "ingress"
             case "s3_archive":
                 return "archive"
+            case _:
+                raise ValueError(f"Invalid bucket name: {bucket}. Must be either 's3_ingress' or 's3_archive'.")
+    else:
+        match bucket.lower():
+            case "s3_ingress":
+                return "prod_data_warehouse_ingress"
+            case "s3_archive":
+                return "prod_data_warehouse_archive"
+            case _:
+                raise ValueError(f"Invalid bucket name: {bucket}. Must be either 's3_ingress' or 's3_archive'.")
 
 
 def _create_client():
@@ -66,20 +78,23 @@ def get_object(is_test: bool, bucket: str, key: str, **kwargs) -> dict:
     @param kwargs: Keyword arguments.
     @return: Object content.
     """
-    if is_test:
-        try:
-            with open(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}", "rb") as f:
-                return {"Body": f.read()}
-        except UnicodeDecodeError:
-            with open(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}", "rb") as f:
-                return {"Body": f.read()}
-    else:
-        client = _create_client()
-        return client.put_object(
-            Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
-            Key=key,
-            **kwargs
-        )
+    try:
+        if is_test:
+            try:
+                with open(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}", "rb") as f:
+                    return {"Body": f.read()}
+            except UnicodeDecodeError:
+                with open(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}", "rb") as f:
+                    return {"Body": f.read()}
+        else:
+            client = _create_client()
+            return client.get_object(
+                Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
+                Key=key,
+                **kwargs
+            )
+    except Exception as e:
+        raise Exception(f"Failed to get object from bucket {bucket} with key {key}. Exception: {e}") from e
 
 
 def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucket: str, target_key: str, **kwargs) -> None:
@@ -93,37 +108,68 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
     @param kwargs: Keyword arguments.
     @return: None.
     """
-    if is_test:
-        body = get_object(
-            is_test=is_test, 
-            bucket=_choose_s3_bucket(is_test=is_test, bucket=source_bucket), 
-            key=source_key
-        )["Body"]
-        put_object(
-            is_test=is_test, 
-            bucket=_choose_s3_bucket(is_test=is_test, bucket=target_bucket), 
-            key=target_key, 
-            body=body
-        )
-    else:
-        try:
+    try:
+        if is_test:
+            body = get_object(
+                is_test=is_test, 
+                bucket=source_bucket, 
+                key=os.path.join("/opt/airflow/files/", source_key)
+            )["Body"]
+            put_object(
+                is_test=is_test, 
+                bucket=source_bucket, 
+                key=os.path.join("/opt/airflow/files/", target_key), 
+                body=body
+            )
+        else:
             client = _create_client()
             client.copy_object(
                 Bucket=_choose_s3_bucket(is_test=is_test, bucket=target_bucket),
                 Key=target_key,
                 CopySource={"Bucket": source_bucket, "Key": source_key},
             )
-        except Exception as e:
-            raise Exception(f"Failed to copy object from source bucket {source_bucket} with object path {source_key} to target bucket {target_bucket} with object path {target_key}. Exception: {e}") from e
+    except Exception as e:
+        raise Exception(f"Failed to copy object from source bucket {source_bucket} with object path {source_key} to target bucket {target_bucket} with object path {target_key}. Exception: {e}") from e
 
 
 def delete_object(is_test: bool, bucket: str, key: str, **kwargs) -> None:
-    if is_test:
-        os.remove(f"/opt/airflow/files/{key}")
-    else:
-        client = _create_client()
-        client.delete_object(
-            Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
-            Key=key,
-            **kwargs
-        )
+    try:
+        if is_test:
+            os.remove(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}")
+        else:
+            client = _create_client()
+            client.delete_object(
+                Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
+                Key=key,
+                **kwargs
+            )
+    except Exception as e:
+        raise Exception(f"Failed to delete object from bucket {bucket} with key {key}. Exception: {e}") from e
+
+
+def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) -> None:
+    """
+    Downloads file from target S3 bucket to /tmp directory.
+    """
+    try:
+        if is_test:
+            body = get_object(
+                is_test=is_test, 
+                bucket=bucket, 
+                key=filename
+            )["Body"]
+            with open(f"tmp/{os.path.basename(filename)}", "wb") as f:
+                f.write(body)
+            return f"tmp/{os.path.basename(filename)}"
+        else:
+            client = _create_client()
+            client.download_file(
+                Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
+                Key=key,
+                Filename=f"tmp/{os.path.basename(filename)}",
+                **kwargs
+            )
+            return f"tmp/{os.path.basename(filename)}"
+    except Exception as e:
+        raise Exception(f"Failed to download file from bucket {bucket} with key {key}. Exception: {e}") from e
+
