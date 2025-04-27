@@ -76,8 +76,8 @@ def load_file_to_table(file_path: str, target_schema: str, target_table: str, co
         raise Exception(f"Failed to load file to {target_schema}.{target_table} with Exception: {e}") from e
 
 
-def ingress_to_staging(operation: str, source_schema: str, source_table: str, target_schema: str, target_table: str, is_test: bool):
-    if operation == "insert":
+def ingress_to_ods(operation: str, source_schema: str, source_table: str, target_schema: str, target_table: str, primary_key: list, is_test: bool):
+    if operation == "append":
         try:
             insert_query = f"""
                 INSERT INTO {target_schema}.{target_table}
@@ -109,11 +109,20 @@ def ingress_to_staging(operation: str, source_schema: str, source_table: str, ta
         except Exception as e:
             raise Exception(f"Failed to replace data in {target_schema}.{target_table} with Exception: {e}") from e
     elif operation == "upsert":
+        merge_condition = ""
+        for i, key in enumerate(primary_key):
+            if i != len(primary_key) - 1:
+                merge_condition += f"source.{key} = target.{key} AND\n"
+            else:
+                merge_condition += f"source.{key} = target.{key}"
         try:
             information_schema_query = f"""
                 SELECT
                     column_name,
-                    data_type
+                    data_type,
+                    character_maximum_length,
+                    numeric_precision,
+                    numeric_scale
                 FROM 
                     INFORMATION_SCHEMA.COLUMNS
                 WHERE
@@ -122,21 +131,44 @@ def ingress_to_staging(operation: str, source_schema: str, source_table: str, ta
                 ORDER BY 
                     ordinal_position ASC
             """
-        columns = execute_query(
-            query=information_schema_query,
-            is_test=is_test
-        )
+            columns_data = execute_query(
+                query=information_schema_query,
+                is_test=is_test
+            )
+            match_logic = ""
+            no_match_logic = ""
+            for i, row in enumerate(columns_data):
+                col = row[0]
+                data_type = row[1]
+                char_max_length = row[2]
+                numeric_precision = row[3]
+                numeric_scale = row[4]
+                if data_type == "character varying":
+                    match_logic += f"target.{col} = source.{col}::character varying({char_max_length}){',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic = f"source.{col}::character varying({char_max_length}){',\n' if i != len(columns_data) - 1 else ''}"
+                elif data_type == "numeric":
+                    match_logic += f"target.{col} = source.{col}::numeric({numeric_precision},{numeric_scale}){',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic = f"source.{col}::numeric({numeric_precision},{numeric_scale}){',\n' if i != len(columns_data) - 1 else ''}"
+                else:
+                    match_logic += f"target.{col} = source.{col}::data_type{',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic = f"source.{col}::data_type{',\n' if i != len(columns_data) - 1 else ''}"
             upsert_query = f"""
-                UPDATE {target_schema}.{target_table} AS target
-                SET column_name = source.column_name
-                FROM {source_schema}.{source_table} AS source
-                WHERE target.id = source.id
+            MERGE INTO 
+                {target_schema}.{target_table} AS source 
+                USING {source_schema}.{source_table} AS target
+            ON
+                {merge_condition}
+            WHEN MATCHED THEN
+                UPDATE SET
+                    {match_logic}
+            WHEN NOT MATCHED THEN
+                INSERT {no_match_logic}
             """
             execute_query(
-                query=update_query,
+                query=upsert_query,
                 is_test=is_test
             )
         except Exception as e:
             raise Exception(f"Failed to update data in {target_schema}.{target_table} with Exception: {e}") from e
     else:
-        raise ValueError(f"Invalid operation: {operation}. Must be either 'insert' or 'update'.")
+        raise ValueError(f"Invalid operation: {operation}. Must be either 'append', 'replace' or 'update'.")

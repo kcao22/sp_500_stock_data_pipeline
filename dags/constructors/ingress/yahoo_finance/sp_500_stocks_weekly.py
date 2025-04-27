@@ -18,6 +18,11 @@ from apps.data_source_utils import yahoo_finance_utils, yahoo_finance_config
             default="",
             type="string",
             description="A comma separated string representation of company symbols to webscrape data for in case of backfills or failed scrapes."
+        ),
+        "is_test": Param(
+            default=False,
+            type="boolean",
+            description="If True, then local. Else AWS prod environment."
         )
     }
 )
@@ -36,7 +41,7 @@ def dag():
         else:
             symbols = [company.get("symbol") for company in yahoo_finance_config.SP_500_CONFIG]
 
-        return scraper.extract_companies_data(daily_or_weekly="weekly", symbols=symbols)
+        return scraper.extract_companies_data(is_test=True,daily_or_weekly="weekly", symbols=symbols)
 
     get_weekly_data()
 

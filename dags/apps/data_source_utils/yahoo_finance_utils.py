@@ -66,7 +66,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
                 ) from e
         return data_record
 
-    def extract_companies_data(self, daily_or_weekly: str, symbols: list) -> str:
+    def extract_companies_data(self, daily_or_weekly: str, symbols: list, is_test: bool) -> str:
         """
         Extracts daily data for all companies listed in yahoo_finance_config's SP_500_SYMBOLS_CONFIG list.
         :param daily_or_weekly: String representation of if daily extract of data or weekly extract of data.
@@ -88,7 +88,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
             time.sleep(2)
         df = pandas.DataFrame(companies_data)
         s3.put_object(
-            is_test=True,
+            is_test=is_test,
             bucket="s3_ingress",
             key=file_path,
             body=df.to_csv(index=False).encode()
