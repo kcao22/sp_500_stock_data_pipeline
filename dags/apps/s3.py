@@ -48,7 +48,7 @@ def put_object(is_test: bool, bucket: str, key: str, body: str, **kwargs) -> Non
         try:
             if key.startswith("/"):
                 key = key[1:]
-            file_path = os.path.join("/opt/airflow/files/", key)
+            file_path = os.path.join("/opt/airflow/files/", _choose_s3_bucket(is_test=is_test, bucket=bucket), key)
             print(f"Key: {key}")
             if not os.path.exists(file_path):
                 os.makedirs(name=os.path.dirname(file_path), exist_ok=True)
@@ -80,11 +80,18 @@ def get_object(is_test: bool, bucket: str, key: str, **kwargs) -> dict:
     """
     try:
         if is_test:
+            if key.startswith("/"):
+                key = key[1:]
+            file_path = os.path.join(
+                "/opt/airflow/files/",
+                _choose_s3_bucket(is_test=is_test, bucket=bucket),
+                key
+            )
             try:
-                with open(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}", "rb") as f:
+                with open(file_path, "rb") as f:
                     return {"Body": f.read()}
             except UnicodeDecodeError:
-                with open(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}", "rb") as f:
+                with open(file_path, "rb") as f:
                     return {"Body": f.read()}
         else:
             client = _create_client()
@@ -111,14 +118,14 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
     try:
         if is_test:
             body = get_object(
-                is_test=is_test, 
-                bucket=source_bucket, 
-                key=os.path.join("/opt/airflow/files/", source_key)
+                is_test=is_test,
+                bucket=source_bucket,
+                key=source_key
             )["Body"]
             put_object(
-                is_test=is_test, 
-                bucket=source_bucket, 
-                key=os.path.join("/opt/airflow/files/", target_key), 
+                is_test=is_test,
+                bucket=source_bucket,
+                key=target_key,
                 body=body
             )
         else:
@@ -135,7 +142,9 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
 def delete_object(is_test: bool, bucket: str, key: str, **kwargs) -> None:
     try:
         if is_test:
-            os.remove(f"/opt/airflow/files/{_choose_s3_bucket(is_test=is_test, bucket=bucket)}/{key}")
+            if key.startswith("/"):
+                key = key[1:]
+            os.remove(os.path.join("/opt/airflow/files/", _choose_s3_bucket(is_test=is_test, bucket=bucket), key))
         else:
             client = _create_client()
             client.delete_object(
@@ -172,4 +181,3 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
             return f"tmp/{os.path.basename(filename)}"
     except Exception as e:
         raise Exception(f"Failed to download file from bucket {bucket} with key {key}. Exception: {e}") from e
-
