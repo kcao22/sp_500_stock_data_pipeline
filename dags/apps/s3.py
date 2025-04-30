@@ -118,6 +118,7 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
     """
     try:
         if is_test:
+            print(f"Getting object from bucket {source_bucket} with key {source_key}")
             body = get_object(
                 is_test=is_test,
                 bucket=source_bucket,

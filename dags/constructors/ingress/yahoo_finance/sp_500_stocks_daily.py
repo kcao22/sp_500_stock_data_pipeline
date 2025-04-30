@@ -68,16 +68,21 @@ def dag():
         return file_path
 
     @task
-    def load_daily_data_to_ingress(file_path: str):
+    def load_daily_data_to_ingress():
         context = get_current_context()
         is_test = False
         if context["params"]["is_test"]:
             is_test = context["params"]["is_test"]
+        most_recent_file = s3.get_most_recent_file(
+            is_test=is_test,
+            bucket="s3_archive",
+            prefix="data_sources/yahoo_finance/daily/",
+        )
         downloaded_file_path = s3.download_file(
             is_test=is_test,
             bucket="s3_ingress",
-            key=file_path,
-            filename=f"tmp/{file_path.split('/')[-1]}"
+            key=most_recent_file,
+            filename=f"tmp/{most_recent_file}"
         )
         data_warehouse_utils.load_file_to_table(
             file_path=downloaded_file_path,
@@ -103,8 +108,7 @@ def dag():
 
     ingress_file_path = get_daily_data()
     archive_file_path = archive_daily_data(file_path=ingress_file_path)
-    load_to_ingress = load_daily_data_to_ingress(file_path=archive_file_path)
-    load_to_ingress >> load_daily_data_to_ods()
+    archive_file_path >> load_daily_data_to_ingress() >> load_daily_data_to_ods()
 
 
 dag()
