@@ -1,3 +1,4 @@
+import datetime
 import boto3
 import os
 
@@ -181,3 +182,50 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
             return f"tmp/{os.path.basename(filename)}"
     except Exception as e:
         raise Exception(f"Failed to download file from bucket {bucket} with key {key}. Exception: {e}") from e
+
+
+def list_objects(is_test: bool, bucket: str, prefix: str = ""):
+    try:
+        if is_test:
+            files = {}
+            for root, dirs, filenames in os.walk(os.path.join("/opt/airflow/files/", _choose_s3_bucket(is_test=is_test, bucket=bucket), prefix)):
+                for filename in filenames:
+                    file_m_time = os.path.getmtime(os.path.join(root, filename))
+                    file_last_modified_datetime = datetime.datetime.fromtimestamp(file_m_time)
+                    file_path = os.path.join(root, filename)
+                    file_path = file_path.replace(os.path.join("/opt/airflow/files/", _choose_s3_bucket(is_test=is_test, bucket=bucket)), "")
+                    files[file_path] = file_last_modified_datetime
+            return {
+                "Contents": [
+                    {
+                        "Key": file_path,
+                        "LastModified": file_last_modified_datetime,
+                    }
+                    for file_path, file_last_modified_datetime in files.items()
+                ]
+            }
+        else:
+            client = _create_client()
+            response = client.list_objects_v2(
+                Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
+                Prefix=prefix,
+            )
+            return response
+    except Exception as e:
+        raise Exception(f"Failed to list objects in bucket {bucket} with prefix {prefix}. Exception: {e}") from e
+
+
+def get_most_recent_file(is_test: bool, bucket: str, prefix: str = "") -> str:
+    files = list_objects(
+        is_test=is_test,
+        bucket=bucket,
+        prefix=prefix
+    )
+    most_recent_file = {}
+    for file in files["Contents"]:
+        if most_recent_file == {}:
+            most_recent_file = file
+            continue
+        elif file["LastModified"] > most_recent_file["LastModified"]:
+            most_recent_file = file
+    return most_recent_file["Key"] if most_recent_file else None
