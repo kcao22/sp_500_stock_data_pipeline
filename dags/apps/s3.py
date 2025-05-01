@@ -5,6 +5,9 @@ import os
 from airflow.models import Variable
 
 
+from apps.print_utils import print_logging_info_decorator
+
+
 def _choose_s3_bucket(is_test: bool, bucket: str):
     print(f"Is Test: {is_test}")
     print(f"Bucket: {bucket}")
@@ -35,6 +38,7 @@ def _create_client():
     return client
 
 
+@print_logging_info_decorator(redacted_params=["body"])
 def put_object(is_test: bool, bucket: str, key: str, body: str, **kwargs) -> None:
     """
     Puts object to target s3 bucket. If local, writes to a mimic bucket in /opt/airflow/files/.
@@ -70,6 +74,7 @@ def put_object(is_test: bool, bucket: str, key: str, body: str, **kwargs) -> Non
             raise Exception(f"Failed to put object for {key} to bucket {bucket} with exception: {e}") from e
 
 
+@print_logging_info_decorator
 def get_object(is_test: bool, bucket: str, key: str, **kwargs) -> dict:
     """
     Gets object from a bucket.
@@ -105,6 +110,7 @@ def get_object(is_test: bool, bucket: str, key: str, **kwargs) -> dict:
         raise Exception(f"Failed to get object from bucket {bucket} with key {key}. Exception: {e}") from e
 
 
+@print_logging_info_decorator
 def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucket: str, target_key: str, **kwargs) -> None:
     """
     Copies object from a source bucket to target bucket.
@@ -141,6 +147,7 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
         raise Exception(f"Failed to copy object from source bucket {source_bucket} with object path {source_key} to target bucket {target_bucket} with object path {target_key}. Exception: {e}") from e
 
 
+@print_logging_info_decorator
 def delete_object(is_test: bool, bucket: str, key: str, **kwargs) -> None:
     try:
         if is_test:
@@ -158,6 +165,7 @@ def delete_object(is_test: bool, bucket: str, key: str, **kwargs) -> None:
         raise Exception(f"Failed to delete object from bucket {bucket} with key {key}. Exception: {e}") from e
 
 
+@print_logging_info_decorator
 def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) -> None:
     """
     Downloads file from target S3 bucket to /tmp directory.
@@ -185,6 +193,7 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
         raise Exception(f"Failed to download file from bucket {bucket} with key {key}. Exception: {e}") from e
 
 
+@print_logging_info_decorator
 def list_objects(is_test: bool, bucket: str, prefix: str = ""):
     try:
         if is_test:
@@ -216,6 +225,7 @@ def list_objects(is_test: bool, bucket: str, prefix: str = ""):
         raise Exception(f"Failed to list objects in bucket {bucket} with prefix {prefix}. Exception: {e}") from e
 
 
+@print_logging_info_decorator
 def get_most_recent_file(is_test: bool, bucket: str, prefix: str = "") -> str:
     files = list_objects(
         is_test=is_test,

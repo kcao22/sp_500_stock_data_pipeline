@@ -4,6 +4,7 @@ import time
 from typing import Dict
 
 from apps import s3
+from apps.print_utils import print_logging_info_decorator
 from apps.webscraper_utils import BeautifulSoupScraper
 from apps.data_source_utils import yahoo_finance_config
 
@@ -66,6 +67,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
                 ) from e
         return data_record
 
+    @print_logging_info_decorator
     def extract_companies_data(self, daily_or_weekly: str, symbols: list, is_test: bool) -> str:
         """
         Extracts daily data for all companies listed in yahoo_finance_config's SP_500_SYMBOLS_CONFIG list.
