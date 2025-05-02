@@ -80,9 +80,9 @@ def dag():
         )
         downloaded_file_path = s3.download_file(
             is_test=is_test,
-            bucket="s3_ingress",
+            bucket="s3_archive",
             key=most_recent_file,
-            filename=f"tmp/{most_recent_file}"
+            filename=most_recent_file
         )
         data_warehouse_utils.load_file_to_table(
             file_path=downloaded_file_path,

@@ -132,7 +132,7 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
             )["Body"]
             put_object(
                 is_test=is_test,
-                bucket=source_bucket,
+                bucket=target_bucket,
                 key=target_key,
                 body=body
             )
@@ -171,12 +171,16 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
     Downloads file from target S3 bucket to /tmp directory.
     """
     try:
+        if key.startswith("/"):
+            key = key[1:]
         if is_test:
             body = get_object(
                 is_test=is_test, 
                 bucket=bucket, 
                 key=filename
             )["Body"]
+            if not os.path.exists("tmp"):
+                os.makedirs(name="tmp", exist_ok=True)
             with open(f"tmp/{os.path.basename(filename)}", "wb") as f:
                 f.write(body)
             return f"tmp/{os.path.basename(filename)}"
@@ -239,4 +243,8 @@ def get_most_recent_file(is_test: bool, bucket: str, prefix: str = "") -> str:
             continue
         elif file["LastModified"] > most_recent_file["LastModified"]:
             most_recent_file = file
+    if most_recent_file and most_recent_file["Key"]:
+        if most_recent_file["Key"].startswith("/"):
+            most_recent_file["Key"] = most_recent_file["Key"][1:]
+    print(f"Most recent file found from {bucket} with prefix {prefix}: {most_recent_file['Key']}")
     return most_recent_file["Key"] if most_recent_file else None
