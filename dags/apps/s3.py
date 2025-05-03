@@ -177,22 +177,23 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
             body = get_object(
                 is_test=is_test, 
                 bucket=bucket, 
-                key=filename
+                key=key
             )["Body"]
-            if not os.path.exists("tmp"):
-                os.makedirs(name="tmp", exist_ok=True)
-            with open(f"tmp/{os.path.basename(filename)}", "wb") as f:
+            if not os.path.exists("/tmp"):
+                os.makedirs(name="/tmp", exist_ok=True)
+            with open(f"/tmp/{os.path.basename(filename)}", "wb") as f:
                 f.write(body)
-            return f"tmp/{os.path.basename(filename)}"
+            return f"/tmp/{os.path.basename(filename)}"
         else:
             client = _create_client()
             client.download_file(
                 Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
                 Key=key,
-                Filename=f"tmp/{os.path.basename(filename)}",
+                Filename=f"/tmp/{os.path.basename(filename)}",
                 **kwargs
             )
-            return f"tmp/{os.path.basename(filename)}"
+            print(f"Downloaded file to: /tmp/{os.path.basename(filename)}")
+            return f"/tmp/{os.path.basename(filename)}"
     except Exception as e:
         raise Exception(f"Failed to download file from bucket {bucket} with key {key}. Exception: {e}") from e
 
