@@ -85,6 +85,7 @@ def dag():
             key=most_recent_file,
             filename=os.path.basename(most_recent_file)
         )
+        f"Downloaded file path is: {downloaded_file_path}"
         data_warehouse_utils.load_file_to_table(
             is_test=is_test,
             file_path=downloaded_file_path,

@@ -183,6 +183,7 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
                 os.makedirs(name="/tmp", exist_ok=True)
             with open(f"/tmp/{os.path.basename(filename)}", "wb") as f:
                 f.write(body)
+            print(f"File downloaded to /tmp/{os.path.basename(filename)}")
             return f"/tmp/{os.path.basename(filename)}"
         else:
             client = _create_client()
@@ -192,7 +193,6 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
                 Filename=f"/tmp/{os.path.basename(filename)}",
                 **kwargs
             )
-            print(f"Downloaded file to: /tmp/{os.path.basename(filename)}")
             return f"/tmp/{os.path.basename(filename)}"
     except Exception as e:
         raise Exception(f"Failed to download file from bucket {bucket} with key {key}. Exception: {e}") from e
