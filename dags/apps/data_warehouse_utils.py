@@ -2,7 +2,10 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from apps.print_utils import print_logging_info_decorator
 
+
+@print_logging_info_decorator(redacted_params=["user", "password"])
 def create_postgres_engine(user: str, password: str, server: str, port: int, db: str, is_test: bool):
     """
     Creates a SQLAlchemy engine for connecting to local postgres warehouse.
@@ -12,18 +15,33 @@ def create_postgres_engine(user: str, password: str, server: str, port: int, db:
     )
 
 
+@print_logging_info_decorator
 def create_postgres_connection(is_test: bool):
     """
     Creates a connection to the Postgres database.
     @return: psycopg2 connection object.
     """
+    user = os.getenv("POSTGRES_USER") if is_test else os.getenv("REDSHIFT_USER")
+    password = os.getenv("POSTGRES_PASSWORD") if is_test else os.getenv("REDSHIFT_PASSWORD")
+    server = os.getenv("POSTGRES_SERVER") if is_test else os.getenv("REDSHIFT_SERVER")
+    port = os.getenv("POSTGRES_PORT") if is_test else os.getenv("REDSHIFT_PORT")
+    db = os.getenv("POSTGRES_DB") if is_test else os.getenv("REDSHIFT_DB")
+
+    # Print statements for debugging
+    print(f"{'TEST' if is_test else 'PRODUCTION'} ENVIRONMENT:")
+    print(f"User: {user}")
+    print(f"Password: {'[REDACTED]'}")  # Avoid printing sensitive information
+    print(f"Server: {server}")
+    print(f"Port: {port}")
+    print(f"Database: {db}")
 
     engine = create_postgres_engine(
-        user=os.getenv("POSTGRES_USER") if is_test else os.getenv("REDSHIFT_USER"),
-        password=os.getenv("POSTGRES_PASSWORD") if is_test else os.getenv("REDSHIFT_PASSWORD"),
-        server=os.getenv("POSTGRES_SERVER") if is_test else os.getenv("REDSHIFT_SERVER"),
-        port=os.getenv("POSTGRES_PORT") if is_test else os.getenv("REDSHIFT_PORT"),
-        db=os.getenv("POSTGRES_DB") if is_test else os.getenv("REDSHIFT_DB")
+        user=user,
+        password=password,
+        server="data-warehouse",
+        port=5432,
+        db=db,
+        is_test=is_test
     )
     try:
         session = sessionmaker(bind=engine)
@@ -32,17 +50,20 @@ def create_postgres_connection(is_test: bool):
         raise Exception(f"Failed to create Postgres connection with Exception: {e}") from e
 
 
+@print_logging_info_decorator
 def execute_query(query: str, is_test: bool):
     session = create_postgres_connection(is_test=is_test)
     try:
-        session.execute(query)
+        result = session.execute(query)
         session.commit()
+        return result.fetchall()
     except Exception as e:
         raise Exception(f"Failed to execute query: {query} with Exception: {e}") from e
     finally:
         session.close()
 
 
+@print_logging_info_decorator
 def load_file_to_table(file_path: str, target_schema: str, target_table: str, copy_options: list, redshift_copy_options: list, is_test: bool):
     try:
         information_schema_query = f"""
@@ -51,8 +72,8 @@ def load_file_to_table(file_path: str, target_schema: str, target_table: str, co
             FROM 
                 INFORMATION_SCHEMA.COLUMNS
             WHERE
-                table_schema = {target_schema}
-                AND table_name = {target_table}
+                table_schema = '{target_schema}'
+                AND table_name = '{target_table}'
             ORDER BY 
                 ordinal_position ASC
         """
@@ -60,14 +81,24 @@ def load_file_to_table(file_path: str, target_schema: str, target_table: str, co
             query=information_schema_query,
             is_test=is_test
         )
-        column_names = ",".joi([column[0] for column in columns])
-        copy_options = "\n".join(copy_option for copy_option in copy_options)
-        redshift_copy_options = "\n".join(redshift_copy_option for redshift_copy_option in redshift_copy_options)
+        column_names = ",\n".join([column[0] for column in columns])
+        copy_options = "\n,".join(copy_option for copy_option in copy_options)
+        redshift_copy_options = "\n,".join(redshift_copy_option for redshift_copy_option in redshift_copy_options)
+        file_path = file_path if is_test else f"s3://prod_data_warehouse_archive/{file_path}"
         copy_query = f"""
             COPY {target_schema}.{target_table} ({column_names})
             FROM '{file_path}'
-            {copy_options if is_test else redshift_copy_options}
         """
+        if is_test:
+            copy_query += f"""
+                \nWITH (
+                    {copy_options}
+                );
+            """
+        else:
+            copy_query += f"""
+                \n{redshift_copy_options}
+            """
         execute_query(
             query=copy_query,
             is_test=is_test
@@ -76,6 +107,7 @@ def load_file_to_table(file_path: str, target_schema: str, target_table: str, co
         raise Exception(f"Failed to load file to {target_schema}.{target_table} with Exception: {e}") from e
 
 
+@print_logging_info_decorator
 def ingress_to_ods(operation: str, source_schema: str, source_table: str, target_schema: str, target_table: str, primary_key: list, is_test: bool):
     if operation == "append":
         try:
@@ -126,8 +158,8 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
                 FROM 
                     INFORMATION_SCHEMA.COLUMNS
                 WHERE
-                    table_schema = {target_schema}
-                    AND table_name = {target_table}
+                    table_schema = '{target_schema}'
+                    AND table_name = '{target_table}'
                 ORDER BY 
                     ordinal_position ASC
             """
