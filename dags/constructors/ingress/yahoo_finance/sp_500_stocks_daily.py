@@ -1,3 +1,4 @@
+import os
 import pendulum
 from airflow.decorators import dag, task
 from airflow.models.param import Param
@@ -82,7 +83,7 @@ def dag():
             is_test=is_test,
             bucket="s3_archive",
             key=most_recent_file,
-            filename=most_recent_file
+            filename=os.path.basename(most_recent_file)
         )
         data_warehouse_utils.load_file_to_table(
             is_test=is_test,
