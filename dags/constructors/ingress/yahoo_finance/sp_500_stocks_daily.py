@@ -85,9 +85,19 @@ def dag():
             filename=most_recent_file
         )
         data_warehouse_utils.load_file_to_table(
+            is_test=is_test,
             file_path=downloaded_file_path,
             target_schema="ingress",
             target_table="companies_daily",
+            copy_options=[
+                "FORMAT csv",
+                "HEADER"
+            ],
+            redshift_copy_options=[
+                "IAM_ROLE 'N/A PLACEHOLDER'"
+                "FORMAT AS csv",
+                "IGNOREHEADER 1"
+            ]
         )
 
     @task
