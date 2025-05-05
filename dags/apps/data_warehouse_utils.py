@@ -190,6 +190,9 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
                 elif data_type == "numeric":
                     match_logic += f"target.{col} = source.{col}::numeric({numeric_precision},{numeric_scale}){',\n' if i != len(columns_data) - 1 else ''}"
                     no_match_logic = f"source.{col}::numeric({numeric_precision},{numeric_scale}){',\n' if i != len(columns_data) - 1 else ''}"
+                elif data_type == "jsonb":
+                    match_logic += f"target.{col} = source.{col}::{'jsonb' if is_test else 'super'}{',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic = f"source.{col}::{'jsonb' if is_test else 'super'}{',\n' if i != len(columns_data) - 1 else ''}"
                 else:
                     match_logic += f"target.{col} = source.{col}::data_type{',\n' if i != len(columns_data) - 1 else ''}"
                     no_match_logic = f"source.{col}::data_type{',\n' if i != len(columns_data) - 1 else ''}"
