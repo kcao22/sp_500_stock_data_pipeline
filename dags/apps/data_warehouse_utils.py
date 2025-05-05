@@ -51,12 +51,15 @@ def create_postgres_connection(is_test: bool):
 
 
 @print_logging_info_decorator
-def execute_query(query: str, is_test: bool):
+def execute_query(query: str, expect_returns: bool, is_test: bool):
     session = create_postgres_connection(is_test=is_test)
     try:
         result = session.execute(query)
         session.commit()
-        return result.fetchall()
+        if expect_returns:
+            return result.fetchall()
+        else:
+            return
     except Exception as e:
         raise Exception(f"Failed to execute query: {query} with Exception: {e}") from e
     finally:
@@ -79,6 +82,7 @@ def load_file_to_table(file_path: str, target_schema: str, target_table: str, co
         """
         columns = execute_query(
             query=information_schema_query,
+            expect_returns=True,
             is_test=is_test
         )
         column_names = ",\n".join([column[0] for column in columns])
@@ -101,6 +105,7 @@ def load_file_to_table(file_path: str, target_schema: str, target_table: str, co
             """
         execute_query(
             query=copy_query,
+            expect_returns=False,
             is_test=is_test
         )
     except Exception as e:
@@ -117,6 +122,7 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
             """
             execute_query(
                 query=insert_query,
+                expect_returns=False,
                 is_test=is_test
             )
         except Exception as e:
@@ -128,6 +134,7 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
             """
             execute_query(
                 query=delete_query,
+                expect_returns=False,
                 is_test=is_test
             )
             insert_query = f"""
@@ -136,6 +143,7 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
             """
             execute_query(
                 query=insert_query,
+                expect_returns=False,
                 is_test=is_test
             )
         except Exception as e:
@@ -165,6 +173,7 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
             """
             columns_data = execute_query(
                 query=information_schema_query,
+                expect_returns=True,
                 is_test=is_test
             )
             match_logic = ""
@@ -198,6 +207,7 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
             """
             execute_query(
                 query=upsert_query,
+                expect_returns=False,
                 is_test=is_test
             )
         except Exception as e:
