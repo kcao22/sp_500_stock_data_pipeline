@@ -41,6 +41,7 @@ x-airflow-common:
     - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
     - ${AIRFLOW_PROJ_DIR:-.}/files:/opt/airflow/files
     - ${AIRFLOW_PROJ_DIR:-.}/migrations:/opt/airflow/migrations
+    - container_tmp:/tmp
   networks:
     - default_net
   user: "${AIRFLOW_UID:-50000}:0"
@@ -264,6 +265,7 @@ services:
       - ./warehouse_pg_hba.conf:/usr/share/postgresql/13/pg_hba.conf
       - ${AIRFLOW_PROJ_DIR:-.}/migrations:/docker-entrypoint-initdb.d
       - ${AIRFLOW_PROJ_DIR:-.}/files:/files
+      - container_tmp:/tmp
     networks:
       - default_net
     healthcheck:
@@ -281,3 +283,4 @@ networks:
 volumes:
   airflow-db-volume:
   data-warehouse-volume:
+  container_tmp:
