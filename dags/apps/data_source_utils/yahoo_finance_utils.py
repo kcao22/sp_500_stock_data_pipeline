@@ -12,7 +12,8 @@ from apps.data_source_utils import yahoo_finance_config
 class YahooFinanceScraper(BeautifulSoupScraper):
     def __init__(self):
         self.config = yahoo_finance_config
-        self.timestamp_str = pendulum.now().format("YYYYMMDD-HHmmss")
+        self.timestamp_str = pendulum.now(tz="UTC").format("YYYYMMDD-HHmmss")
+        self.today_timestamp_str = pendulum.now().start_of("day").format("YYYYMMDD-HHmmss")
         super().__init__()
 
     def _get_data(self, symbol: str, scope: str) -> Dict:
@@ -25,7 +26,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         """
         url = f"https://finance.yahoo.com/quote/{symbol}/{'profile/' if scope == 'weekly' else ''}"
         soup = super().request_webpage(url=url)
-        data_record = {"symbol": symbol, "load_timestamp_utc": pendulum.now(tz="UTC").to_iso8601_string()}
+        data_record = {"symbol": symbol, "load_timestamp_utc": self.today_timestamp_str}
         extract_config = (
             self.config.DIM_DATA_EXTRACT_CONFIG
             if url.endswith("profile/")
@@ -83,7 +84,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         else:
             scope = daily_or_weekly.lower()
 
-        file_path = f"/data_sources/yahoo_finance/{scope}/{self.timestamp_str}/{scope}_{self.timestamp_str}.csv"
+        file_path = f"/data_sources/yahoo_finance/{scope}/{self.timestamp_str}/{scope}_{self.today_timestamp_str}.csv"
         companies_data = []
         for symbol in symbols:
             companies_data.append(self._get_data(symbol=symbol, scope=scope))
