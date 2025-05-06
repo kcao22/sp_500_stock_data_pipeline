@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS ods.companies_daily (
     bid VARCHAR(64),
     ask VARCHAR(64),
     day_range VARCHAR(64),
-    volume BIGINT),
+    volume BIGINT,
     avg_volume BIGINT,
     intraday_market_cap VARCHAR(32),
     beta NUMERIC(5,2),

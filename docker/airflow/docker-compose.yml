@@ -269,7 +269,7 @@ services:
     networks:
       - default_net
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "warehouse_user"]
+      test: ["CMD", "pg_isready", "-U", "warehouse_user", ]
       interval: 10s
       retries: 5
       start_period: 5s

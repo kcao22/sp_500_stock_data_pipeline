@@ -150,6 +150,17 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
             raise Exception(f"Failed to replace data in {target_schema}.{target_table} with Exception: {e}") from e
     elif operation == "upsert":
         merge_condition = ""
+        primary_key_query = f"""
+            SELECT
+                column_name,
+                data_type,
+                character_maximum_length,
+                numeric_precision,
+                numeric_scale
+            FROM
+                INFORMATION_SCHEMA.COLUMNS
+            WHERE column_name IN ({','.join(primary_key)})
+        """
         for i, key in enumerate(primary_key):
             if i != len(primary_key) - 1:
                 merge_condition += f"source.{key} = target.{key} AND\n"
@@ -176,6 +187,7 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
                 expect_returns=True,
                 is_test=is_test
             )
+            cols = ""
             match_logic = ""
             no_match_logic = ""
             for i, row in enumerate(columns_data):
@@ -184,18 +196,22 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
                 char_max_length = row[2]
                 numeric_precision = row[3]
                 numeric_scale = row[4]
+                cols += f"{col}{',\n' if i != len(columns_data) - 1 else ''}"
                 if data_type == "character varying":
                     match_logic += f"target.{col} = source.{col}::character varying({char_max_length}){',\n' if i != len(columns_data) - 1 else ''}"
-                    no_match_logic = f"source.{col}::character varying({char_max_length}){',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic += f"source.{col}::character varying({char_max_length}){',\n' if i != len(columns_data) - 1 else ''}"
                 elif data_type == "numeric":
                     match_logic += f"target.{col} = source.{col}::numeric({numeric_precision},{numeric_scale}){',\n' if i != len(columns_data) - 1 else ''}"
-                    no_match_logic = f"source.{col}::numeric({numeric_precision},{numeric_scale}){',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic += f"source.{col}::numeric({numeric_precision},{numeric_scale}){',\n' if i != len(columns_data) - 1 else ''}"
+                elif "timestamp" in data_type:
+                    match_logic += f"target.{col} = source.{col}::timestamp{',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic += f"source.{col}::timestamp{',\n' if i != len(columns_data) - 1 else ''}"
                 elif data_type == "jsonb":
                     match_logic += f"target.{col} = source.{col}::{'jsonb' if is_test else 'super'}{',\n' if i != len(columns_data) - 1 else ''}"
-                    no_match_logic = f"source.{col}::{'jsonb' if is_test else 'super'}{',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic += f"source.{col}::{'jsonb' if is_test else 'super'}{',\n' if i != len(columns_data) - 1 else ''}"
                 else:
-                    match_logic += f"target.{col} = source.{col}::data_type{',\n' if i != len(columns_data) - 1 else ''}"
-                    no_match_logic = f"source.{col}::data_type{',\n' if i != len(columns_data) - 1 else ''}"
+                    match_logic += f"target.{col} = source.{col}::{data_type}{',\n' if i != len(columns_data) - 1 else ''}"
+                    no_match_logic += f"source.{col}::{data_type}{',\n' if i != len(columns_data) - 1 else ''}"
             upsert_query = f"""
             MERGE INTO 
                 {target_schema}.{target_table} AS source 
@@ -206,7 +222,8 @@ def ingress_to_ods(operation: str, source_schema: str, source_table: str, target
                 UPDATE SET
                     {match_logic}
             WHEN NOT MATCHED THEN
-                INSERT {no_match_logic}
+                INSERT ({cols})
+                VALUES ({no_match_logic})
             """
             execute_query(
                 query=upsert_query,
