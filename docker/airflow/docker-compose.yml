@@ -253,7 +253,7 @@ services:
         condition: service_completed_successfully
 
   data-warehouse:
-    image: postgres:13
+    image: postgres:17
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -262,7 +262,7 @@ services:
       - "5433:5432"
     volumes:
       - data-warehouse-volume:/var/lib/postgresql/data
-      - ./warehouse_pg_hba.conf:/usr/share/postgresql/13/pg_hba.conf
+      - ./warehouse_pg_hba.conf:/usr/share/postgresql/data/pg_hba.conf
       - ${AIRFLOW_PROJ_DIR:-.}/migrations:/docker-entrypoint-initdb.d
       - ${AIRFLOW_PROJ_DIR:-.}/files:/files
       - container_tmp:/tmp
