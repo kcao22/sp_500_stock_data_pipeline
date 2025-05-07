@@ -173,7 +173,10 @@ def ingress_to_ods(
                 numeric_scale
             FROM
                 INFORMATION_SCHEMA.COLUMNS
-            WHERE column_name IN ({primary_keys})
+            WHERE 
+                column_name IN ({primary_keys})
+                and table_schema = '{target_schema}'
+                and table_name = '{target_table}'
         """
         primary_key_data = execute_query(
             query=primary_key_query,
@@ -224,7 +227,7 @@ def ingress_to_ods(
                 char_max_length = row[2]
                 numeric_precision = row[3]
                 numeric_scale = row[4]
-                cols += f"source.{col}{',\n' if i != len(columns_data) - 1 else ''}"
+                cols += f"{col}{',\n' if i != len(columns_data) - 1 else ''}"
                 match_logic += _get_match_logic(
                     column=col,
                     data_type=data_type,
@@ -279,15 +282,15 @@ def _get_match_logic(
     Returns the match logic for the given column based on its data type.
     """
     if data_type == "character varying":
-        return f"target.{column} = source.{column}::character varying({char_max_length})"
+        return f"{column} = source.{column}::character varying({char_max_length})"
     elif data_type == "numeric":
-        return f"target.{column} = source.{column}::numeric({numeric_precision},{numeric_scale})"
+        return f"{column} = source.{column}::numeric({numeric_precision},{numeric_scale})"
     elif "timestamp" in data_type:
-        return f"target.{column} = source.{column}::timestamp"
+        return f"{column} = source.{column}::timestamp"
     elif data_type == "jsonb":
-        return f"target.{column} = source.{column}::{'jsonb' if is_test else 'super'}"
+        return f"{column} = source.{column}::{'jsonb' if is_test else 'super'}"
     else:
-        return f"target.{column} = source.{column}::{data_type}"
+        return f"{column} = source.{column}::{data_type}"
 
 
 def _get_cast_logic(
