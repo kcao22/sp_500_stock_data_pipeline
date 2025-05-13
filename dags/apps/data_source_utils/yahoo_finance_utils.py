@@ -1,6 +1,7 @@
 import pandas
 import pendulum
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Dict
 
 from apps import s3
@@ -86,9 +87,20 @@ class YahooFinanceScraper(BeautifulSoupScraper):
 
         file_path = f"/data_sources/yahoo_finance/{scope}/{self.timestamp_str}/{scope}_{self.today_timestamp_str}.csv"
         companies_data = []
-        for symbol in symbols:
-            companies_data.append(self._get_data(symbol=symbol, scope=scope))
-            time.sleep(2)
+
+        # Helper function for parallelizing webscraping.
+        def _scrape_symbol(symbol):
+            return self._get_data(symbol=symbol, scope=scope)
+
+        with ThreadPoolExecutor(max_workers=10) as executor:
+            future_to_symbol = {executor.submit(_scrape_symbol, symbol): symbol for symbol in symbols}
+            for future in as_completed(future_to_symbol):
+                symbol = future_to_symbol[future]
+                try:
+                    companies_data.append(future.result())
+                except Exception as e:
+                    print(f"Failed to scrape data for {symbol}: {e}")
+
         df = pandas.DataFrame(companies_data)
         s3.put_object(
             is_test=is_test,
