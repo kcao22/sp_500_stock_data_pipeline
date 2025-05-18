@@ -22,9 +22,9 @@ def _choose_s3_bucket(is_test: bool, bucket: str):
     else:
         match bucket.lower():
             case "s3_ingress":
-                return "prod_data_warehouse_ingress"
+                return "kc-prod-data-warehouse-ingress"
             case "s3_archive":
-                return "prod_data_warehouse_archive"
+                return "kc-prod-data-warehouse-archive"
             case _:
                 raise ValueError(f"Invalid bucket name: {bucket}. Must be either 's3_ingress' or 's3_archive'.")
 

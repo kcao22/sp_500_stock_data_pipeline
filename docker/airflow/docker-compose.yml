@@ -277,8 +277,9 @@ services:
 
 # Networks
 networks: 
-  default_net: 
-    driver: bridge
+  default_net:
+    external: true
+    name: airflow_default_net
 
 volumes:
   airflow-db-volume:

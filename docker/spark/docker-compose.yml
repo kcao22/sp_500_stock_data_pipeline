@@ -48,4 +48,5 @@ services:
 
 networks:
   default_net:
-    driver: bridge
+    external: true
+    name: airflow_default_net 

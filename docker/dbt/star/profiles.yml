@@ -2,18 +2,18 @@ stock_transaction_streaming_profile:
   target: dev
   outputs:
     dev:
-      type: postgres
-      host: "{{ env_var('POSTGRES_SERVER') }}"
-      user: "{{ env_var('POSTGRES_USER') }}"
-      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      type: redshift
+      host: "{{ env_var('REDSHIFT_SERVER') }}"
+      user: "{{ env_var('REDSHIFT_USER') }}"
+      password: "{{ env_var('REDSHIFT_PASSWORD') }}"
       port: 5433
-      dbname: "{{ env_var('POSTGRES_DB') }}"
-      schema: "{{ env_var('POSTGRES_DEV_SCHEMA') }}"
+      dbname: "{{ env_var('REDSHIFT_DB') }}"
+      schema: "{{ env_var('REDSHIFT_DEV_SCHEMA') }}"
     prod:
-      type: postgres
-      host: "{{ env_var('POSTGRES_SERVER') }}"
-      user: "{{ env_var('POSTGRES_USER') }}"
-      password: "{{ env_var('POSTGRES_PASSWORD') }}"
+      type: redshift
+      host: "{{ env_var('REDSHIFT_SERVER') }}"
+      user: "{{ env_var('REDSHIFT_USER') }}"
+      password: "{{ env_var('REDSHIFT_PASSWORD') }}"
       port: 5433
-      dbname: "{{ env_var('POSTGRES_DB') }}"
-      schema: "{{ env_var('POSTGRES_PROD_SCHEMA') }}"
+      dbname: "{{ env_var('REDSHIFT_DB') }}"
+      schema: "{{ env_var('REDSHIFT_PROD_SCHEMA') }}"
