@@ -1,0 +1,53 @@
+version: 2
+
+sources:
+  - name: ods
+    schema: ods
+    tables:
+      - name: companies_daily
+        description: "Contains data on daily stock data for companies based on Yahoo Finance."
+        loaded_at_field: load_timestamp_utc
+        freshness:
+          warn_after: { count: 12, period: hour }
+          error_after: { count: 24, period: hour }
+        columns:
+          - name: symbol
+            description: "A unique stock symbol representing each company. Example: AAPL for Apple."
+            tests:
+              - not_null
+          - name: company_name
+            description: "The full name of the company associated with the stock symbol."
+          - name: load_timestamp_utc
+            description: "The timestamp (in UTC) when the data was loaded into the table."
+            tests:
+              - not_null
+          - name: previous_close
+            description: "The stock price at market close on the previous trading day."
+          - name: open
+            description: "The stock price at the market open on the current trading day."
+          - name: bid
+            description: "The highest price a buyer is willing to pay for the stock."
+          - name: ask
+            description: "The lowest price a seller is willing to accept for the stock."
+          - name: day_range
+            description: "The range (low to high) of the stock price during the trading day."
+          - name: volume
+            description: "The total number of shares traded during the trading day."
+          - name: avg_volume
+            description: "The average number of shares traded per day over a recent period."
+          - name: intraday_market_cap
+            description: "The company’s estimated market capitalization during the trading day."
+          - name: beta
+            description: "A measure of the stock's volatility relative to the overall market."
+          - name: pe_ratio
+            description: "Price-to-earnings ratio metric that indicates how much investors are paying per dollar of earnings."
+          - name: eps
+            description: "Earnings per share metric measuring the portion of a company's profit allocated to each outstanding share."
+          - name: earnings_date
+            description: "The next date when the company is expected to release earnings results."
+          - name: forward_dividend_and_yield
+            description: "Projected dividend payments and yield percentage based on current stock price."
+          - name: ex_dividend_date
+            description: "The date after which new buyers of the stock are not entitled to the declared dividend."
+          - name: one_year_target_estimate
+            description: "Projected stock price estimate for one year into the future."

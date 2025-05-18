@@ -6,11 +6,11 @@ services:
     volumes:
       - ../dbt/star:/usr/app/dbt/star
     entrypoint: [ "/bin/sh", "-c" ]
-    command: [ "ls -ltr && dbt run && sleep infinity"]
+    command: [ "ls -ltr && dbt deps && dbt run && sleep infinity"]
     networks:
       - default_net
     environment:
-      - POSTGRES_SERVER=${POSTGRES_SERVER}
+      - POSTGRES_SERVER=data-warehouse
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_PORT=${POSTGRES_PORT}
@@ -20,4 +20,5 @@ services:
 
 networks:
   default_net:
-    driver: bridge
+    external: true
+    name: airflow_default_net 
