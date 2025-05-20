@@ -1,19 +1,11 @@
 stock_transaction_streaming_profile:
-  target: dev
+  target: default
   outputs:
-    dev:
+    default:
       type: redshift
       host: "{{ env_var('REDSHIFT_SERVER') }}"
       user: "{{ env_var('REDSHIFT_USER') }}"
       password: "{{ env_var('REDSHIFT_PASSWORD') }}"
-      port: 5433
+      port: "{{ env_var('REDSHIFT_PORT') }}"
       dbname: "{{ env_var('REDSHIFT_DB') }}"
-      schema: "{{ env_var('REDSHIFT_DEV_SCHEMA') }}"
-    prod:
-      type: redshift
-      host: "{{ env_var('REDSHIFT_SERVER') }}"
-      user: "{{ env_var('REDSHIFT_USER') }}"
-      password: "{{ env_var('REDSHIFT_PASSWORD') }}"
-      port: 5433
-      dbname: "{{ env_var('REDSHIFT_DB') }}"
-      schema: "{{ env_var('REDSHIFT_PROD_SCHEMA') }}"
+      schema: "staging"

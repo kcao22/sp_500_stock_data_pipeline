@@ -128,9 +128,9 @@ resource "aws_security_group" "prod_redshift_sg" {
   vpc_id      = aws_vpc.prod_redshift_serverless_vpc.id
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 5439
+    to_port     = 5439
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -140,6 +140,34 @@ resource "aws_security_group" "prod_redshift_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+}
+
+resource "aws_internet_gateway" "prod_redshift_igw" {
+  vpc_id = aws_vpc.prod_redshift_serverless_vpc.id
+}
+
+resource "aws_route_table" "prod_redshift_route_table" {
+  vpc_id = aws_vpc.prod_redshift_serverless_vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.prod_redshift_igw.id
+  }
+}
+
+resource "aws_route_table_association" "prod_redshift_subnet_a_association" {
+  subnet_id      = aws_subnet.prod_redshift_subnet_a.id
+  route_table_id = aws_route_table.prod_redshift_route_table.id
+}
+
+resource "aws_route_table_association" "prod_redshift_subnet_b_association" {
+  subnet_id      = aws_subnet.prod_redshift_subnet_b.id
+  route_table_id = aws_route_table.prod_redshift_route_table.id
+}
+
+resource "aws_route_table_association" "prod_redshift_subnet_c_association" {
+  subnet_id      = aws_subnet.prod_redshift_subnet_c.id
+  route_table_id = aws_route_table.prod_redshift_route_table.id
 }
 
 resource "aws_redshiftserverless_namespace" "prod_redshift_namespace" {
@@ -156,16 +184,17 @@ resource "aws_redshiftserverless_namespace" "prod_redshift_namespace" {
   ]
 }
 
-resource "aws_redshiftserverless_workgroup" "prod_redshift_workgroup" {
-  namespace_name    = aws_redshiftserverless_namespace.prod_redshift_namespace.namespace_name
-  workgroup_name     = "prod-redshift-workgroup"
-  base_capacity     = 8
-  max_capacity = 8
-  enhanced_vpc_routing = true
-  security_group_ids = [aws_security_group.prod_redshift_sg.id]
-  subnet_ids        = [
-    aws_subnet.prod_redshift_subnet_a.id,
-    aws_subnet.prod_redshift_subnet_b.id,
-    aws_subnet.prod_redshift_subnet_c.id
-  ]
-}
+# resource "aws_redshiftserverless_workgroup" "prod_redshift_workgroup" {
+#   namespace_name    = aws_redshiftserverless_namespace.prod_redshift_namespace.namespace_name
+#   workgroup_name     = "prod-redshift-workgroup"
+#   base_capacity     = 8
+#   max_capacity = 8
+#   enhanced_vpc_routing = true
+#   security_group_ids = [aws_security_group.prod_redshift_sg.id]
+#   subnet_ids        = [
+#     aws_subnet.prod_redshift_subnet_a.id,
+#     aws_subnet.prod_redshift_subnet_b.id,
+#     aws_subnet.prod_redshift_subnet_c.id
+#   ]
+#   publicly_accessible = true
+# }

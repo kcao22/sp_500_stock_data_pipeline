@@ -96,7 +96,7 @@ def dag():
                 "HEADER"
             ],
             redshift_copy_options=[
-                "IAM_ROLE 'N/A PLACEHOLDER'"
+                f"IAM_ROLE '{os.environ.get('REDW_ARN')}'"
                 "FORMAT AS csv",
                 "IGNOREHEADER 1"
             ]

@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: daily_data
+    description: "Transforms raw stock data from the 'companies_daily' source into a cleaned and enriched dataset for analysis."
+    columns:
+      - name: symbol
+        description: "A unique stock symbol representing each company. Example: AAPL for Apple."
+        tests:
+          - not_null
+      - name: load_timestamp_utc
+        description: "The timestamp (in UTC) when the data was loaded into the table."
+        tests:
+          - not_null
+      - name: previous_close
+        description: "The stock price at market close on the previous trading day."
+      - name: open
+        description: "The stock price at the market open on the current trading day."
+      - name: bid_price
+        description: "The highest price a buyer is willing to pay for the stock."
+      - name: bid_size
+        description: "The number of shares a buyer is willing to purchase at the bid price."
+      - name: ask_price
+        description: "The lowest price a seller is willing to accept for the stock."
+      - name: ask_size
+        description: "The number of shares a seller is willing to sell at the ask price."
+      - name: day_range_low
+        description: "The lowest stock price during the trading day."
+      - name: day_range_high
+        description: "The highest stock price during the trading day."
+      - name: volume
+        description: "The total number of shares traded during the trading day."
+      - name: avg_volume
+        description: "The average number of shares traded over a specified period."
+      - name: intraday_market_cap_trillions
+        description: "The market capitalization of the company during the trading day, in trillions."
+      - name: beta
+        description: "The stock's beta value, indicating its volatility relative to the market."
+      - name: pe_ratio
+        description: "The price-to-earnings ratio of the stock."
+      - name: eps
+        description: "The earnings per share of the company."
+      - name: earnings_date_min
+        description: "The earliest date in the earnings date range."
+      - name: earnings_date_max
+        description: "The latest date in the earnings date range."
+      - name: forward_dividend_and_yield
+        description: "The forward dividend and yield of the stock."
+      - name: ex_dividend_date
+        description: "The ex-dividend date for the stock."
+      - name: one_year_target_estimate
+        description: "The one-year target estimate for the stock price."

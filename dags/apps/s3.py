@@ -2,15 +2,11 @@ import datetime
 import boto3
 import os
 
-from airflow.models import Variable
-
 
 from apps.print_utils import print_logging_info_decorator
 
 
 def _choose_s3_bucket(is_test: bool, bucket: str):
-    print(f"Is Test: {is_test}")
-    print(f"Bucket: {bucket}")
     if is_test:
         match bucket.lower():
             case "s3_ingress":
@@ -32,8 +28,8 @@ def _choose_s3_bucket(is_test: bool, bucket: str):
 def _create_client():
     client = boto3.client(
         "s3",
-        aws_access_key_id=Variable.get("AWS_ACCESS_KEY_ID"),
-        aws_secret_access_key=Variable.get("AWS_SECRET_ACCESS_KEY"),
+        aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
+        aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
     )
     return client
 
@@ -49,12 +45,11 @@ def put_object(is_test: bool, bucket: str, key: str, body: str, **kwargs) -> Non
     @param kwargs: Keyword arguments.
     @return: File key.
     """
+    if key.startswith("/"):
+        key = key[1:]
     if is_test:
         try:
-            if key.startswith("/"):
-                key = key[1:]
             file_path = os.path.join("/opt/airflow/files/", _choose_s3_bucket(is_test=is_test, bucket=bucket), key)
-            print(f"Key: {key}")
             if not os.path.exists(file_path):
                 os.makedirs(name=os.path.dirname(file_path), exist_ok=True)
             with open(file_path, "wb") as f:
@@ -84,10 +79,10 @@ def get_object(is_test: bool, bucket: str, key: str, **kwargs) -> dict:
     @param kwargs: Keyword arguments.
     @return: Object content.
     """
+    if key.startswith("/"):
+        key = key[1:]
     try:
         if is_test:
-            if key.startswith("/"):
-                key = key[1:]
             file_path = os.path.join(
                 "/opt/airflow/files/",
                 _choose_s3_bucket(is_test=is_test, bucket=bucket),
@@ -122,9 +117,9 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
     @param kwargs: Keyword arguments.
     @return: None.
     """
+    print(f"Getting object from bucket {source_bucket} with key {source_key}")
     try:
         if is_test:
-            print(f"Getting object from bucket {source_bucket} with key {source_key}")
             body = get_object(
                 is_test=is_test,
                 bucket=source_bucket,
@@ -137,9 +132,11 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
                 body=body
             )
         else:
+            source_bucket = _choose_s3_bucket(is_test=is_test, bucket=source_bucket)
+            target_bucket = _choose_s3_bucket(is_test=is_test, bucket=target_bucket)
             client = _create_client()
             client.copy_object(
-                Bucket=_choose_s3_bucket(is_test=is_test, bucket=target_bucket),
+                Bucket=target_bucket,
                 Key=target_key,
                 CopySource={"Bucket": source_bucket, "Key": source_key},
             )
@@ -149,10 +146,10 @@ def copy_object(is_test: bool, source_bucket: str, source_key: str, target_bucke
 
 @print_logging_info_decorator
 def delete_object(is_test: bool, bucket: str, key: str, **kwargs) -> None:
+    if key.startswith("/"):
+        key = key[1:]
     try:
         if is_test:
-            if key.startswith("/"):
-                key = key[1:]
             os.remove(os.path.join("/opt/airflow/files/", _choose_s3_bucket(is_test=is_test, bucket=bucket), key))
         else:
             client = _create_client()
@@ -170,9 +167,9 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
     """
     Downloads file from target S3 bucket to /tmp directory.
     """
+    if key.startswith("/"):
+        key = key[1:]
     try:
-        if key.startswith("/"):
-            key = key[1:]
         if is_test:
             body = get_object(
                 is_test=is_test, 
@@ -187,6 +184,9 @@ def download_file(is_test:bool, bucket: str, key: str, filename: str, **kwargs) 
             return f"/tmp/{os.path.basename(filename)}"
         else:
             client = _create_client()
+            print(f"Key: {key}")
+            print(f"Bucket: {_choose_s3_bucket(is_test=is_test, bucket=bucket)}")
+            print(f"Is Test: {is_test}")
             client.download_file(
                 Bucket=_choose_s3_bucket(is_test=is_test, bucket=bucket),
                 Key=key,

@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 
-@print_logging_info_decorator(redacted_params=["user", "password"])
+@print_logging_info_decorator(redacted_params=["user", "password", "server"])
 def create_postgres_engine(
     user: str, password: str, server: str, port: int, db: str, is_test: bool
 ):
@@ -31,19 +31,11 @@ def create_postgres_connection(is_test: bool):
     port = os.getenv("POSTGRES_PORT") if is_test else os.getenv("REDSHIFT_PORT")
     db = os.getenv("POSTGRES_DB") if is_test else os.getenv("REDSHIFT_DB")
 
-    # Print statements for debugging
-    print(f"{'TEST' if is_test else 'PRODUCTION'} ENVIRONMENT:")
-    print(f"User: {user}")
-    print(f"Password: {'[REDACTED]'}")  # Avoid printing sensitive information
-    print(f"Server: {server}")
-    print(f"Port: {port}")
-    print(f"Database: {db}")
-
     engine = create_postgres_engine(
         user=user,
         password=password,
-        server="data-warehouse",
-        port=5432,
+        server=server,
+        port=port,
         db=db,
         is_test=is_test,
     )
@@ -82,6 +74,14 @@ def load_file_to_table(
     is_test: bool,
 ):
     try:
+        truncate_query = f"""
+            TRUNCATE TABLE {target_schema}.{target_table};
+        """
+        execute_query(
+            query=truncate_query,
+            expect_returns=False,
+            is_test=is_test
+        )
         information_schema_query = f"""
             SELECT
                 column_name
