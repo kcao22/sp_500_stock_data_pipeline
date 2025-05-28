@@ -43,17 +43,21 @@ resource "aws_s3_bucket" "prod_s3_archive_bucket" {
 # Redshift serverless role for attaching policies
 resource "aws_iam_role" "prod_redshift_serverless_role" {
   name = "prod_redshift_serverless_role"
-
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Action = "sts:AssumeRole"
-        Effect = "Allow"
+        Effect = "Allow",
         Principal = {
-          Service = "redshift-serverless.amazonaws.com"
-        }
-      },
+          Service = [
+            "redshift.amazonaws.com",
+            "redshift-serverless.amazonaws.com",
+            "s3.amazonaws.com",
+            "iam.amazonaws.com"
+          ]
+        },
+        Action = "sts:AssumeRole"
+      }
     ]
   })
 }
@@ -71,11 +75,40 @@ resource "aws_iam_policy" "prod_s3_redshift_serverless_rw_policy" {
       {
         "Sid": "ReadObjects",
         "Effect": "Allow",
-        "Action": "s3:*Object",
+        "Action": [
+          "s3:GetObject",
+          "s3:GetObjectVersion"
+        ],
         "Resource": [
-        "arn:aws:s3:::${var.ingress_bucket_name}/*",
-        "arn:aws:s3:::${var.archive_bucket_name}/*"
+          "arn:aws:s3:::kc-prod-data-warehouse-archive/*",
+          "arn:aws:s3:::kc-prod-data-warehouse-ingress/*"
         ]
+      },
+      {
+        "Sid": "ListBuckets",
+        "Effect": "Allow",
+        "Action": "s3:ListBucket",
+        "Resource": [
+          "arn:aws:s3:::kc-prod-data-warehouse-archive",
+          "arn:aws:s3:::kc-prod-data-warehouse-ingress"
+        ]
+      },
+      {
+        "Sid": "RedshiftAndSupportPermissions",
+        "Effect": "Allow",
+        "Action": [
+          "redshift:*",
+          "redshift-data:*",
+          "redshift-serverless:*",
+          "sqlworkbench:*",
+          "sts:AssumeRole",
+          "secretsmanager:GetSecretValue",
+          "cloudwatch:*",
+          "tag:GetResources",
+          "ec2:Describe*",
+          "sns:Publish"
+        ],
+        "Resource": "*"
       }
     ]
   }
@@ -184,17 +217,17 @@ resource "aws_redshiftserverless_namespace" "prod_redshift_namespace" {
   ]
 }
 
-# resource "aws_redshiftserverless_workgroup" "prod_redshift_workgroup" {
-#   namespace_name    = aws_redshiftserverless_namespace.prod_redshift_namespace.namespace_name
-#   workgroup_name     = "prod-redshift-workgroup"
-#   base_capacity     = 8
-#   max_capacity = 8
-#   enhanced_vpc_routing = true
-#   security_group_ids = [aws_security_group.prod_redshift_sg.id]
-#   subnet_ids        = [
-#     aws_subnet.prod_redshift_subnet_a.id,
-#     aws_subnet.prod_redshift_subnet_b.id,
-#     aws_subnet.prod_redshift_subnet_c.id
-#   ]
-#   publicly_accessible = true
-# }
+resource "aws_redshiftserverless_workgroup" "prod_redshift_workgroup" {
+  namespace_name    = aws_redshiftserverless_namespace.prod_redshift_namespace.namespace_name
+  workgroup_name     = "prod-redshift-workgroup"
+  base_capacity     = 8
+  max_capacity = 8
+  enhanced_vpc_routing = true
+  security_group_ids = [aws_security_group.prod_redshift_sg.id]
+  subnet_ids        = [
+    aws_subnet.prod_redshift_subnet_a.id,
+    aws_subnet.prod_redshift_subnet_b.id,
+    aws_subnet.prod_redshift_subnet_c.id
+  ]
+  publicly_accessible = true
+}
