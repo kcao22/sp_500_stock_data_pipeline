@@ -17,7 +17,7 @@ WITH base_data AS (
         forward_dividend_and_yield,
         ex_dividend_date,
         one_year_target_estimate
-    FROM {{ source('ods', 'companies_daily') }}
+    FROM {{ source('ods_yahoo', 'companies_daily') }}
 ),
 parsed_bid_ask AS (
     SELECT
