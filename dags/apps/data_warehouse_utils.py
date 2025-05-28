@@ -1,6 +1,7 @@
 import os
 
 from apps.print_utils import print_logging_info_decorator
+from apps.s3 import _choose_s3_bucket
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -98,11 +99,9 @@ def load_file_to_table(
         )
         column_names = ",\n".join([column[0] for column in columns])
         copy_options = "\n,".join(copy_option for copy_option in copy_options)
-        redshift_copy_options = "\n,".join(
-            redshift_copy_option for redshift_copy_option in redshift_copy_options
-        )
+        redshift_copy_options = "\n".join(redshift_copy_options)
         file_path = (
-            file_path if is_test else f"s3://prod_data_warehouse_archive/{file_path}"
+            file_path if is_test else f"s3://{_choose_s3_bucket(is_test=is_test, bucket='s3_archive')}/{file_path}"
         )
         copy_query = f"""
             COPY {target_schema}.{target_table} ({column_names})
@@ -197,7 +196,7 @@ def ingress_to_ods(
                 numeric_scale=numeric_scale,
                 is_test=is_test
             )
-            merge_condition += f"target.{col} = {source_col_cast}"
+            merge_condition += f"{target_schema}.{target_table}.{col} = {source_col_cast}"
             merge_condition += f"{' AND ' if i != len(primary_key_data) - 1 else ''}"
         try:
             information_schema_query = f"""
@@ -230,6 +229,8 @@ def ingress_to_ods(
                 cols += f"{col}{',\n' if i != len(columns_data) - 1 else ''}"
                 match_logic += _get_match_logic(
                     column=col,
+                    target_schema=target_schema,
+                    target_table=target_table,
                     data_type=data_type,
                     char_max_length=char_max_length,
                     numeric_precision=numeric_precision,
@@ -248,7 +249,7 @@ def ingress_to_ods(
                 no_match_logic += f"{',\n' if i != len(columns_data) - 1 else ''}"
             upsert_query = f"""
             MERGE INTO 
-                {target_schema}.{target_table} AS target 
+                {target_schema}.{target_table}
                 USING {source_schema}.{source_table} AS source
             ON
                 {merge_condition}
@@ -271,6 +272,8 @@ def ingress_to_ods(
 
 
 def _get_match_logic(
+    target_schema: str,
+    target_table: str,
     column: str,
     data_type: str,
     char_max_length: int,
