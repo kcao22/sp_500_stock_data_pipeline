@@ -74,29 +74,30 @@ def dag():
         is_test = False
         if context["params"]["is_test"]:
             is_test = context["params"]["is_test"]
-        most_recent_file = s3.get_most_recent_file(
+        file_path = s3.get_most_recent_file(
             is_test=is_test,
             bucket="s3_archive",
             prefix="data_sources/yahoo_finance/daily/",
         )
-        downloaded_file_path = s3.download_file(
-            is_test=is_test,
-            bucket="s3_archive",
-            key=most_recent_file,
-            filename=os.path.basename(most_recent_file)
-        )
-        f"Downloaded file path is: {downloaded_file_path}"
+        if is_test:
+            file_path = s3.download_file(
+                is_test=is_test,
+                bucket="s3_archive",
+                key=file_path,
+                filename=os.path.basename(file_path)
+            )
+            print(f"Downloaded file path is: {file_path}")
         data_warehouse_utils.load_file_to_table(
             is_test=is_test,
-            file_path=downloaded_file_path,
-            target_schema="ingress",
+            file_path=file_path,
+            target_schema="ingress_yahoo",
             target_table="companies_daily",
             copy_options=[
                 "FORMAT csv",
                 "HEADER"
             ],
             redshift_copy_options=[
-                f"IAM_ROLE '{os.environ.get('REDW_ARN')}'"
+                f"IAM_ROLE '{os.environ.get('REDW_ARN')}'",
                 "FORMAT AS csv",
                 "IGNOREHEADER 1"
             ]
@@ -110,9 +111,9 @@ def dag():
             is_test = context["params"]["is_test"]
         data_warehouse_utils.ingress_to_ods(
             operation="upsert",
-            source_schema="ingress",
+            source_schema="ingress_yahoo",
             source_table="companies_daily",
-            target_schema="ods",
+            target_schema="ods_yahoo",
             target_table="companies_daily",
             primary_key=["symbol", "load_timestamp_utc"],
             is_test=is_test
