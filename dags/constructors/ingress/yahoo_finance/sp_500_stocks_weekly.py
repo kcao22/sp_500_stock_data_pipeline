@@ -11,7 +11,7 @@ from apps.data_source_utils import yahoo_finance_utils, yahoo_finance_config
     dag_id=af_utils.get_dag_name(dag_file_path=__file__),
     default_args=af_utils.get_default_args(),
     start_date=pendulum.datetime(year=2025, month=1, day=11),
-    schedule="0 7 * * 7",
+    schedule="0 19 * * 7",
     catchup=False,
     tags=["data_source: yahoo", "schedule: weekly"],
     params={
@@ -111,9 +111,9 @@ def dag():
             is_test = context["params"]["is_test"]
         data_warehouse_utils.ingress_to_ods(
             operation="upsert",
-            source_schema="ingress",
+            source_schema="ingress_yahoo",
             source_table="companies_weekly",
-            target_schema="ods",
+            target_schema="ods_yahoo",
             target_table="companies_weekly",
             primary_key=["symbol", "load_timestamp_utc"],
             is_test=is_test
