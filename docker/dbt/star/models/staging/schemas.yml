@@ -1,8 +1,8 @@
 version: 2
 
 models:
-  - name: daily_data
-    description: "Transforms raw stock data from the 'companies_daily' source into a cleaned and enriched dataset for analysis."
+  - name: companies_daily
+    description: "Transforms and cleans raw stock data from the 'companies_daily' source."
     columns:
       - name: symbol
         description: "A unique stock symbol representing each company. Example: AAPL for Apple."
@@ -50,3 +50,57 @@ models:
         description: "The ex-dividend date for the stock."
       - name: one_year_target_estimate
         description: "The one-year target estimate for the stock price."
+
+  - name: companies_weekly
+    description:
+      Transforms and cleans raw weekly company data from the 'companies_weekly' source.
+    columns:
+      - name: symbol
+        description:
+          A unique stock symbol representing each company. Example: AAPL for Apple.
+        tests:
+          - not_null
+      - name: load_timestamp_utc
+        description:
+          The timestamp (in UTC) when the data was loaded into the table.
+        tests:
+          - not_null
+      - name: company_name
+        description:
+          The name of the company.
+      - name: company_street_address
+        description:
+          The parsed street address of the company extracted from the raw address field.
+      - name: company_city
+        description:
+          The parsed city of the company extracted from the raw address field.
+      - name: company_state
+        description:
+          The parsed state of the company extracted from the raw address field.
+      - name: company_zip_code
+        description:
+          The parsed zip code of the company extracted from the raw address field.
+      - name: company_country
+        description:
+          The parsed country of the company extracted from the raw address field.
+      - name: company_phone_number
+        description:
+          The cleaned phone number of the company, containing only numeric digits.
+      - name: company_website
+        description:
+          The website URL of the company.
+      - name: company_sector
+        description:
+          The sector in which the company operates (e.g., Technology).
+      - name: company_industry
+        description:
+          The industry in which the company operates (e.g., Consumer Electronics).
+      - name: company_full_time_employees
+        description:
+          The cleaned count of full-time employees at the company, containing only numeric digits.
+      - name: company_description
+        description:
+          A cleaned description of the company, with unnecessary prefixes removed.
+      - name: company_corporate_governance_score
+        description:
+          The cleaned corporate governance score of the company, with unnecessary prefixes removed.
