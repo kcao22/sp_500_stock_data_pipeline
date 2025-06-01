@@ -1,8 +1,8 @@
 version: 2
 
 sources:
-  - name: ods
-    schema: ods
+  - name: ods_yahoo
+    schema: ods_yahoo
     tables:
       - name: companies_daily
         description: "Contains data on daily stock data for companies based on Yahoo Finance."
