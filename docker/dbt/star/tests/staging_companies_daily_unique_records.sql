@@ -3,7 +3,7 @@ WITH duplicates AS (
         symbol,
         load_timestamp_utc,
         COUNT(*) AS count
-    FROM {{ source('ods', 'companies_daily') }}
+    FROM {{ source('ods_yahoo', 'companies_daily') }}
     GROUP BY symbol, load_timestamp_utc
     HAVING COUNT(*) > 1
 )
