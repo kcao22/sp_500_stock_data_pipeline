@@ -6,7 +6,7 @@ services:
     volumes:
       - ../dbt/star:/usr/app/dbt/star
     entrypoint: [ "/bin/sh", "-c" ]
-    command: [ "ls -ltr && env && dbt run && sleep infinity"]
+    command: [ "sleep infinity"]
     networks:
       - default_net
     environment:
@@ -17,6 +17,13 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_DEV_SCHEMA=${POSTGRES_DEV_SCHEMA}
       - POSTGRES_PROD_SCHEMA=${POSTGRES_PROD_SCHEMA}
+      - REDSHIFT_USER=${REDSHIFT_USER}
+      - REDSHIFT_PASSWORD=${REDSHIFT_PASSWORD}
+      - REDSHIFT_PORT=${REDSHIFT_PORT}
+      - REDSHIFT_DB=${REDSHIFT_DB}
+      - REDSHIFT_SERVER=${REDSHIFT_SERVER}
+      - REDSHIFT_DEV_SCHEMA=${REDSHIFT_DEV_SCHEMA}
+      - REDSHIFT_PROD_SCHEMA=${REDSHIFT_PROD_SCHEMA}
 
 networks:
   default_net:
