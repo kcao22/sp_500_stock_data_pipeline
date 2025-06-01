@@ -6,6 +6,6 @@ stock_transaction_streaming_profile:
       host: "{{ env_var('REDSHIFT_SERVER') }}"
       user: "{{ env_var('REDSHIFT_USER') }}"
       password: "{{ env_var('REDSHIFT_PASSWORD') }}"
-      port: "{{ env_var('REDSHIFT_PORT') }}"
+      port: "{{ env_var('REDSHIFT_PORT') | int }}"
       dbname: "{{ env_var('REDSHIFT_DB') }}"
       schema: "staging"
