@@ -74,7 +74,7 @@ CREATE TABLE IF NOT EXISTS ods_yahoo.companies_weekly (
     company_website VARCHAR(512),
     company_sector VARCHAR(128),
     company_industry VARCHAR(128),
-    company_full_time_employees INTEGER,
+    company_full_time_employees VARCHAR(64),
     company_description VARCHAR(65535),
     company_corporate_governance_score VARCHAR(1024),
     PRIMARY KEY (symbol, load_timestamp_utc)
