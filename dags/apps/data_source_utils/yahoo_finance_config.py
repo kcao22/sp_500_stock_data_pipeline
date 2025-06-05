@@ -682,24 +682,23 @@ DIM_DATA_EXTRACT_CONFIG = [
 	},
 	{
 		"target_field": "company_sector",
-		"html_element_tag": "a",
-		"identifier_attribute": "data-ylk",
-		"identifier_value": "elm:itm;elmt:link;itc:0;sec:qsp-company-overview;subsec:profile;slk:Communication%20Services",
-		"is_data_value": True
+		"html_element_tag": "dt",
+		"text_class_name": "yf-wxp4ja",
+		"text_class_filter": "Sector:",
+		"sibling_html_element_value_tag": "dd",
+		"sibling_html_element_value_class": None,
+		"is_text_value": True,
+		"is_nested_text_value": True
 	},
 	{
 		"target_field": "company_industry",
-		"html_element_tag": "a",
-		"identifier_attribute": "data-ylk",
-		"identifier_value": "elm:itm;elmt:link;itc:0;sec:qsp-company-overview;subsec:profile;slk:Internet%20Content%20%26%20Information",
-		"is_data_value": True
-	},
-	{
-		"target_field": "company_full_time_employees",
 		"html_element_tag": "dt",
-		"identifier_attribute": "strong",
-		"identifier_value": "",
-		"is_data_value": True
+		"text_class_name": "yf-wxp4ja",
+		"text_class_filter": "Industry:",
+		"sibling_html_element_value_tag": "a",
+		"sibling_html_element_value_class": "subtle-link fin-size-large yf-17w8w6",
+		"is_text_value": True,
+		"is_nested_text_value": True
 	},
 	{
 		"target_field": "company_full_time_employees",

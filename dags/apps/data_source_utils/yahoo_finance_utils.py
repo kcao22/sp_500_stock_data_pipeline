@@ -85,7 +85,7 @@ class YahooFinanceScraper(BeautifulSoupScraper):
         else:
             scope = daily_or_weekly.lower()
 
-        file_path = f"data_sources/yahoo_finance/{scope}/{self.timestamp_str}/{scope}_{self.today_timestamp_str}.csv"
+        file_path = f"data_sources/yahoo_finance/{scope}/{self.timestamp_str}/{scope}_{self.timestamp_str}.csv"
         companies_data = []
 
         # Helper function for parallelizing webscraping.
