@@ -51,3 +51,37 @@ sources:
             description: "The date after which new buyers of the stock are not entitled to the declared dividend."
           - name: one_year_target_estimate
             description: "Projected stock price estimate for one year into the future."
+
+      - name: companies_weekly
+        description: "Contains raw weekly company information based on Yahoo Finance."
+        loaded_at_field: load_timestamp_utc
+        freshness:
+          warn_after: { count: 7, period: day }
+          error_after: { count: 7, period: day }
+        columns:
+          - name: symbol
+            description: "A unique stock symbol representing each company. Example: AAPL for Apple."
+            tests:
+              - not_null
+          - name: load_timestamp_utc
+            description: "The timestamp (in UTC) when the data was loaded into the table."
+            tests:
+              - not_null
+          - name: company_name
+            description: "The name of the company."
+          - name: company_address
+            description: "The full address of the company as a single field."
+          - name: company_phone_number
+            description: "The phone number of the company."
+          - name: company_website
+            description: "The website URL of the company."
+          - name: company_sector
+            description: "The sector in which the company operates (e.g., Technology)."
+          - name: company_industry
+            description: "The industry in which the company operates (e.g., Consumer Electronics)."
+          - name: company_full_time_employees
+            description: "The number of full-time employees at the company."
+          - name: company_description
+            description: "A description of the company."
+          - name: company_corporate_governance_score
+            description: "The corporate governance score of the company."
