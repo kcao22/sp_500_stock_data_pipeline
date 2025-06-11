@@ -36,6 +36,9 @@ models:
     staging:
       +schema: staging
       +materialized: incremental
+    transforms:
+      +schema: transforms
+      +materialized: materialized_view
     marts:
       +schema: prod
       dim_companies:
