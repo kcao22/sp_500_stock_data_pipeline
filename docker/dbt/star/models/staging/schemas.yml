@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: companies_daily
+  - name: stg_companies_daily
     description: "Transforms and cleans raw stock data from the 'companies_daily' source."
     columns:
       - name: symbol
@@ -51,7 +51,7 @@ models:
       - name: one_year_target_estimate
         description: "The one-year target estimate for the stock price."
 
-  - name: companies_weekly
+  - name: stg_companies_weekly
     description: "Transforms and cleans raw weekly company data from the 'companies_weekly' source."
     columns:
       - name: symbol
