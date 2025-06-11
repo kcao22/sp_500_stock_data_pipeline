@@ -38,6 +38,14 @@ models:
       +materialized: incremental
     marts:
       +schema: prod
+      dim_companies:
+        +materialized: table
+      dim_industry:
+        +materialized: table
+      dim_sector:
+        +materialized: table
+      dim_states:
+        +materialized: table
       materialized: view
 
 seeds:
