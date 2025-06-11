@@ -42,4 +42,6 @@ models:
 
 seeds:
   star:
+    +quote_columns: false
+    delimiter: ","
     +schema: prod
