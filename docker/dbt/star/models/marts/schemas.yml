@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: fact_stocks
+    description: "Fact table containing daily stock data for S&P 500 companies."
+    columns:
+      - name: symbol
+  - name: dim_companies
+    description: "Dimension table containing IDs, symbols, and names for S&P 500 companies."
+    columns:
+      - name: company_id
+        description: "Unique identifier for the company."
+      - name: company_symbol
+        description: "A company's unique stock abbreviation."
+      - name: company_name
+        description: "A company's full name."
+  - name: dim_industry
+    description: "Dimension table containing industry ID and name for companies."
+    columns:
+      - name: industry_id
+        description: "Unique identifier for the industry."
+      - name: industry_name
+        description: "Name of the industry."
+  - name: dim_sector
+    description: "Dimension table containing sector ID and name for companies."
+    columns:
+      - name: sector_id
+        description: "Unique identifier for the sector."
+      - name: sector_name
+        description: "Name of the sector."
+  - name: dim_states
+    description: "Dimension table containing state ID and name for companies."
+    columns:
+      - name: state_id
+        description: "Unique identifier for the state."
+      - name: state_name
+        description: "Name of the state."
+
+SELECT
+    symbol,
+    load_timestamp_utc,
+    previous_close,
+    open_price,
+    bid_price,
+    bid_size,
+    ask_price,
+    ask_size,
+    day_range_low,
+    day_range_high,
+    volume,
+    avg_volume,
+    intraday_market_cap_trillions,
+    beta,
+    pe_ratio,
+    eps,
+    earnings_date_min,
+    earnings_date_max,
+    forward_dividend_and_yield,
+    ex_dividend_date,
+    one_year_target_estimate
+FROM daily_data
