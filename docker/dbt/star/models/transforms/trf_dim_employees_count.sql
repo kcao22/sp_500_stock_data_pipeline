@@ -13,7 +13,7 @@ WITH company_employees AS (
         company_symbol,
         company_name
     FROM {{ ref('dim_companies') }}
-), dim_employees AS (
+), dim_employees_count AS (
     SELECT
         dc.company_id AS company_id,
         company_full_time_employees,
@@ -28,5 +28,5 @@ SELECT
     company_full_time_employees,
     load_timestamp_utc_from,
     load_timestamp_utc_to
-FROM dim_employees
+FROM dim_employees_count
 

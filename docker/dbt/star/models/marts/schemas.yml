@@ -35,7 +35,7 @@ models:
         description: "Unique identifier for the state."
       - name: state_name
         description: "Name of the state."
-  - name: dim_employees
+  - name: dim_employees_count
     description: "Dimension table containing company ID and full-time employee count."
     columns:
       - name: company_id
