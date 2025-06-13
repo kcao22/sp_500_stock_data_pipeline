@@ -38,7 +38,7 @@ models:
       +materialized: incremental
     transforms:
       +schema: transforms
-      +materialized: materialized_view
+      +materialized: incremental
     marts:
       +schema: prod
       dim_companies:
@@ -49,6 +49,7 @@ models:
         +materialized: table
       dim_states:
         +materialized: table
+      fact_stocks:
       materialized: view
 
 seeds:

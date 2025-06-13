@@ -1,3 +1,26 @@
 SELECT
-    
-FROM {{ ref(companies_daily)}}
+    company_id,
+    industry_id,
+    sector_id,
+    state_id,
+    load_timestamp_utc,
+    previous_close,
+    open_price,
+    bid_price,
+    bid_size,
+    ask_price,
+    ask_size,
+    day_range_low,
+    day_range_high,
+    volume,
+    avg_volume,
+    intraday_market_cap_trillions,
+    beta,
+    pe_ratio,
+    eps,
+    earnings_date_min,
+    earnings_date_max,
+    forward_dividend_and_yield,
+    ex_dividend_date,
+    one_year_target_estimate
+FROM {{ ref('trf_fact_stocks')}}
