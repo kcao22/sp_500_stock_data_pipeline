@@ -1,0 +1,79 @@
+version: 2
+
+models:
+  - name: trf_fact_stocks
+    description: "Transforms and prepares daily stocks fact table for dimensional modeling."
+    columns:
+      - name: company_id
+        description: "Unique identifier for the company."
+        tests:
+          - not_null
+      - name: industry_id
+        description: "Unique identifier for the industry."
+        tests:
+          - not_null
+      - name: sector_id
+        description: "Unique identifier for the sector."
+        tests:
+          - not_null
+      - name: state_id
+        description: "Unique identifier for the state."
+        tests:
+          - not_null
+      - name: load_timestamp_utc
+        description: "UTC Timestamp when the data was extracted from Yahoo Finance."
+        tests:
+          - not_null
+      - name: previous_close
+        description: "Previous closing price of the stock."
+      - name: open_price
+        description: "Opening price of the stock."
+      - name: bid_price
+        description: "Bid price of the stock."
+      - name: bid_size
+        description: "Size of the bid for the stock."
+      - name: ask_price
+        description: "Ask price of the stock."
+      - name: ask_size
+        description: "Size of the ask for the stock."
+      - name: day_range_low
+        description: "Lowest price of the stock for the day."
+      - name: day_range_high
+        description: "Highest price of the stock for the day."
+      - name: volume
+        description: "Total volume of stocks traded for the day."
+      - name: avg_volume
+        description: "Average volume of stocks traded over a specified period."
+      - name: intraday_market_cap_trillions
+        description: "Market capitalization of the company in trillions of USD."
+      - name: beta
+        description: "Beta value indicating the stock's volatility compared to the market."
+      - name: pe_ratio
+        description: "Price-to-earnings ratio of the stock."
+      - name: eps
+        description: "Earnings per share of the company."
+      - name: earnings_date_min
+        description: "Earliest date of the company's earnings report."
+      - name: earnings_date_max
+        description: "Latest date of the company's earnings report."
+      - name: forward_dividend_and_yield
+        description: "Forward dividend and yield of the stock."
+      - name: ex_dividend_date
+        description: "Ex-dividend date for the stock."
+      - name: one_year_target_estimate
+        description: "One year target estimate for the stock price."
+  - name: trf_dim_companies
+    description: "Transforms and prepares company employees slowly changing dimension table for dimensional modeling."
+    columns:
+      - name: company_id
+        description: "Unique identifier for the company."
+        tests:
+          - not_null
+      - name: company_full_time_employees
+        description: "Number of full-time employees in the company."
+      - name: load_timestamp_utc_from
+        description: "UTC Timestamp when the data was loaded into the table."
+        tests:
+          - not_null
+      - name: load_timestamp_utc_to
+        description: "UTC Timestamp when the next extract of data was loaded into the table. In other words, the current row is valid until this timestamp."
