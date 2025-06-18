@@ -15,3 +15,6 @@ docker compose --file ./dbt/docker-compose.yml --env-file .env up -d
 
 echo "Building Spark containers..."
 docker compose --file ./spark/docker-compose.yml --env-file .env up -d
+
+echo "Building Kafka containers..."
+docker compose --file ./kafka/docker-compose.yml --env-file .env up -d
