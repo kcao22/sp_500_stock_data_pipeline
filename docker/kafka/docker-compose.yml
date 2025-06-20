@@ -23,6 +23,17 @@ services:
       # Partitioning
       - KAFKA_CFG_NUM_PARTITIONS=10
 
+  schema-registry:
+    image: docker.io/bitnami/schema-registry:7.9
+    ports:
+      - '8091:8091'
+    depends_on:
+      - kafka
+      - kafka
+    environment:
+      - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8091
+      - SCHEMA_REGISTRY_KAFKA_BROKERS=PLAINTEXT://kafka-0:9092,PLAINTEXT://kafka-1:9092
+
 networks:
   default_net:
     external: true
