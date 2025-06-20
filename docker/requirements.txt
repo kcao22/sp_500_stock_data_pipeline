@@ -3,7 +3,7 @@
 apache-airflow==2.10.3
 beautifulsoup4==4.12.3
 boto3==1.35.36
-confluent-kafka==2.6.0
+confluent-kafka[avro]==2.6.0
 pandas==2.1.4
 pendulum==3.0.0
 polars==1.17.1

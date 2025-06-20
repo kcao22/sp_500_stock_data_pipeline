@@ -3,16 +3,39 @@ import pendulum
 import random
 import time
 from uuid import uuid4
-from confluent_kafka import Producer
+from confluent_kafka.avro import AvroProducer
+from confluent_kafka.schema_registry import SchemaRegistryClient
 
 
-def create_producer(endpoint: str = "kafka:9092") -> Producer:
+class YahooFinanceTransactionsProducer:
+    def __init__(
+            self,
+            schema_registry_endpoint: str = "schema-registry:8091",
+            kafka_endpoint: str = "kafka:9092",
+            topic: str = "stock_transactions"
+            schema: dict = {
+                "type": "record",
+                "name": "stock_transaction",
+                "fields": [
+                    {"name": "transaction_id", "type": "string"},
+                    {"name": "customer_id", "type": "int"},
+                    {"name": "company_id", "type": "int"},
+                    {"name": "volume_traded", "type": "int"},
+                    {"name": "transaction_timestamp_utc", "type": "string"}
+                ]
+            }
+
+        )
+    self.schema_registry_endpoint = 
+
+def create_producer(endpoint: str = "kafka:9092", schema_registry_endpoint: str = "schema-registry:8091" ) -> AvroProducer:
     """
     Creates Kafka producer.
     """
-    return Producer({
-        "bootstrap.servers": endpoint
-    })
+    return AvroProducer({
+        "bootstrap.servers": endpoint,
+        "schema.registry.url": schema_registry_endpoint
+    }, default_key_schema=load("schemas/transaction_key.avsc"),
 
 def produce_transaction():
     """
