@@ -29,7 +29,8 @@ services:
       - '8091:8091'
     depends_on:
       - kafka
-      - kafka
+    networks:
+      - default_net
     environment:
       - SCHEMA_REGISTRY_LISTENERS=http://0.0.0.0:8091
       - SCHEMA_REGISTRY_KAFKA_BROKERS=PLAINTEXT://kafka-0:9092,PLAINTEXT://kafka-1:9092
