@@ -22,9 +22,14 @@ services:
       - KAFKA_CFG_INTER_BROKER_LISTENER_NAME=PLAINTEXT
       # Partitioning
       - KAFKA_CFG_NUM_PARTITIONS=10
+      - KAFKA_SCHEMA_REGISTRY_ENDPOINT=${KAFKA_SCHEMA_REGISTRY_ENDPOINT}
+      - KAFKA_ENDPOINT=${KAFKA_ENDPOINT}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
 
   schema-registry:
-    image: docker.io/bitnami/schema-registry:7.9
+    build:
+      context: ..
+      dockerfile: kafka/schema_registry.dockerfile
     ports:
       - '8091:8091'
     depends_on:
