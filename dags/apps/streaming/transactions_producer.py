@@ -1,7 +1,7 @@
 import logging
 import time
 
-from utils import YahooFinanceTransactionsAvroProducer
+from apps.kafka_utils import YahooFinanceTransactionsAvroProducer
 
 if __name__ == "__main__":
     transaction_producer = YahooFinanceTransactionsAvroProducer()
