@@ -1,0 +1,14 @@
+services:
+  transactions-producer:
+    build:
+      context: ..
+      dockerfile: streaming/transactions_producer.dockerfile
+    entrypoint: [ "python" ]
+    networks:
+      - default_net
+
+
+networks:
+  default_net:
+    external: true
+    name: airflow_default_net 
