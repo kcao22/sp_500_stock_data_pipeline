@@ -18,3 +18,6 @@ docker compose --file ./spark/docker-compose.yml --env-file .env up -d
 
 echo "Building Kafka containers..."
 docker compose --file ./kafka/docker-compose.yml --env-file .env up -d
+
+echo "Building streaming containers..."
+docker compose --file ./streaming/docker-compose.yml --env-file .env up -d

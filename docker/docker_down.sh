@@ -16,5 +16,8 @@ docker compose --file ./spark/docker-compose.yml  --env-file .env down -v
 echo "Tearing down Kafka containers..."
 docker compose --file ./kafka/docker-compose.yml  --env-file .env down -v
 
+echo "Tearing down streaming containers..."
+docker compose --file ./streaming/docker-compose.yml --env-file .env down -v
+
 echo "Pruning unused volumes..."
 docker system prune --volumes -f &
