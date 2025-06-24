@@ -3,7 +3,14 @@ services:
     build:
       context: ..
       dockerfile: streaming/transactions_producer.dockerfile
-    entrypoint: [ "python" ]
+    environment:
+      AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
+      PYTHONPATH: ${PYTHONPATH}
+    volumes:
+      - ${AIRFLOW_PROJ_DIR:-.}/dags/:/opt/airflow/dags
+    # entrypoint: [ "/bin/sh", "-c" ]
+    entrypoint: [ "python", "../opt/airflow/apps/streaming/transactions_producer.py" ]
+    command: [ "sleep infinity" ]
     networks:
       - default_net
 
