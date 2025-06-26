@@ -1,9 +1,11 @@
 import logging
+import os
 import pendulum
 import random
-import time
+from apps.print_utils import print_logging_info_decorator
 from typing import Dict
 from uuid import uuid4
+from confluent_kafka import avro
 from confluent_kafka.avro import AvroProducer
 
 
@@ -19,10 +21,10 @@ class YahooFinanceTransactionsAvroProducer:
             "type": "record",
             "name": "transaction_key",
             "fields": [
-                {"name": "company_id", "type": "string"}
+                {"name": "company_id", "type": "int"}
             ]
-        },
-        value_schema: dict = {
+        }""",
+        value_schema: str = """{
             "type": "record",
             "name": "transaction_value",
             "fields": [
@@ -32,7 +34,7 @@ class YahooFinanceTransactionsAvroProducer:
                 {"name": "volume_traded", "type": "int"},
                 {"name": "transaction_timestamp_utc", "type": "string"}
             ]
-        }
+        }"""
     ):
         """
         Creates Kafka producer object for creating mock stock transactions.
@@ -45,8 +47,8 @@ class YahooFinanceTransactionsAvroProducer:
         self.schema_registry_endpoint = schema_registry_endpoint
         self.kafka_endpoint = kafka_endpoint
         self.topic = topic
-        self.key_schema = key_schema
-        self.value_schema = value_schema
+        self.key_schema = avro.loads(key_schema)
+        self.value_schema = avro.loads(value_schema)
         self.producer = self._create_producer()
 
     def _create_producer(self) -> AvroProducer:
@@ -79,7 +81,7 @@ class YahooFinanceTransactionsAvroProducer:
             self.producer.produce(
                 topic=self.topic,
                 value=transaction,
-                key={"company_id": str(transaction["company_id"])},
+                key={"company_id": transaction["company_id"]},
                 callback=lambda err, msg: logging.info(f"Produced message {transaction}") if not err else logging.error(f"Error producing message: {err}")
             )
             self.producer.flush()
