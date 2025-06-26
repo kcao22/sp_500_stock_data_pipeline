@@ -51,6 +51,7 @@ class YahooFinanceTransactionsAvroProducer:
         self.value_schema = avro.loads(value_schema)
         self.producer = self._create_producer()
 
+    @print_logging_info_decorator
     def _create_producer(self) -> AvroProducer:
         """
         Creates Kafka producer.
@@ -60,6 +61,7 @@ class YahooFinanceTransactionsAvroProducer:
             "schema.registry.url": self.schema_registry_endpoint
         }, default_key_schema=self.key_schema, default_value_schema=self.value_schema)
 
+    @print_logging_info_decorator
     def _get_mock_transaction(self) -> Dict:
         """
         Produces a mock stock transaction dictionary to send to Kafka broker (buy or sell).
@@ -72,6 +74,7 @@ class YahooFinanceTransactionsAvroProducer:
             "transaction_timestamp_utc": pendulum.now("UTC").to_iso8601_string()
         }
 
+    @print_logging_info_decorator
     def produce_transaction(self):
         """
         Produces a mock stock transaction to the Kafka topic.
