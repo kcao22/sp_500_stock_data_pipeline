@@ -6,10 +6,13 @@ services:
     environment:
       AIRFLOW_PROJ_DIR: ${AIRFLOW_PROJ_DIR}
       PYTHONPATH: ${PYTHONPATH}
+      KAFKA_SCHEMA_REGISTRY_ENDPOINT: ${KAFKA_SCHEMA_REGISTRY_ENDPOINT}
+      KAFKA_ENDPOINT: ${KAFKA_ENDPOINT}
+      KAFKA_TOPIC: ${KAFKA_TOPIC}
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}/dags/:/opt/airflow/dags
-    # entrypoint: [ "/bin/sh", "-c" ]
-    entrypoint: [ "python", "../opt/airflow/apps/streaming/transactions_producer.py" ]
+    entrypoint: [ "/bin/sh", "-c" ]
+    # Run python opt/airflow/dags/streaming/transactions_producer.py to produce transactions
     command: [ "sleep infinity" ]
     networks:
       - default_net
