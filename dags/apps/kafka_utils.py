@@ -12,10 +12,10 @@ logging.basicConfig(level=logging.INFO)
 class YahooFinanceTransactionsAvroProducer:
     def __init__(
         self,
-        schema_registry_endpoint: str = "schema-registry:8091",
-        kafka_endpoint: str = "kafka:9092",
-        topic: str = "stock_transactions",
-        key_schema: dict = {
+        schema_registry_endpoint: str = os.environ.get("KAFKA_SCHEMA_REGISTRY_ENDPOINT"),
+        kafka_endpoint: str = os.environ.get("KAFKA_ENDPOINT"),
+        topic: str = os.environ.get("KAFKA_TOPIC"),
+        key_schema: str = """{
             "type": "record",
             "name": "transaction_key",
             "fields": [
