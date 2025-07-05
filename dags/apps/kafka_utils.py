@@ -2,6 +2,7 @@ import logging
 import os
 import pendulum
 import random
+from apps import kafka_config
 from apps.print_utils import print_logging_info_decorator
 from typing import Dict
 from uuid import uuid4
@@ -11,30 +12,15 @@ from confluent_kafka.avro import AvroProducer
 
 logging.basicConfig(level=logging.INFO)
 
+
 class YahooFinanceTransactionsAvroProducer:
     def __init__(
         self,
         schema_registry_endpoint: str = os.environ.get("KAFKA_SCHEMA_REGISTRY_ENDPOINT"),
         kafka_endpoint: str = os.environ.get("KAFKA_ENDPOINT"),
         topic: str = os.environ.get("KAFKA_TOPIC"),
-        key_schema: str = """{
-            "type": "record",
-            "name": "transaction_key",
-            "fields": [
-                {"name": "company_id", "type": "int"}
-            ]
-        }""",
-        value_schema: str = """{
-            "type": "record",
-            "name": "transaction_value",
-            "fields": [
-                {"name": "transaction_id", "type": "string"},
-                {"name": "customer_id", "type": "int"},
-                {"name": "company_id", "type": "int"},
-                {"name": "volume_traded", "type": "int"},
-                {"name": "transaction_timestamp_utc", "type": "string"}
-            ]
-        }"""
+        key_schema: str = kafka_config.schemas["transactions"]["key_schema"],
+        value_schema: str = kafka_config.schemas["transactions"]["value_schema"]
     ):
         """
         Creates Kafka producer object for creating mock stock transactions.
