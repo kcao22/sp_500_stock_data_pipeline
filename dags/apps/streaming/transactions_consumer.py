@@ -1,61 +1,49 @@
 import os
+import pendulum
 import requests
+import pyspark.sql.functions as F
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import from_json, col
-from pyspark.sql.types import StructType, StringType, DoubleType, TimestampType, IntegerType
 
 
-# Get message schema
-value_schema = None
-try:
-    response = requests.get(f"{os.environ.get('KAFKA_SCHEMA_REGISTRY_ENDPOINT')}/subjects/{os.environ.get('KAFKA_TOPIC')}/versions/latest")
-    value_schema = response.json()["schema"]
-except Exception as e:
-    raise Exception(f"Failed to fetch schema from schema registry: {e}")
+def get_topic_schema(schema_registry_endpoint: str = os.environ.get("KAFKA_SCHEMA_REGISTRY_ENDPOINT"), topic: str = os.environ.get("KAFKA_TOPIC")) -> str:
+    """
+    Returns the Avro schema for the specified Kafka topic.
+    :param topic: Kafka topic name.
+    :return: Avro schema as a string.
+    """
+    schema_reponse = requests.get(
+        url=f"{schema_registry_endpoint}/subjects/{topic}-value/versions/latest"
+    )
+    schema_reponse.raise_for_status()
+    return schema_reponse.json().get("schema")
 
-# Create spark session
+
+# Create Spark session and add Kafka + Avro Java dependencies
 spark = SparkSession.builder \
-    .appName("transactions_consumer") \
-    .config("spark.jars.packages",
-            "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1,"
-            "org.apache.spark:spark-avro_2.12:3.4.1,"
-            "org.apache.hadoop:hadoop-aws:3.3.2") \
+    .appName("transactions_consumer_1") \
+    .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0,io.confluent:kafka-avro-serializer:7.4.0") \
+    .config("spark.serializer", "org.apache.spark.serializer.KryoSerializer") \
+    .config("schema.registry.url", os.environ.get("KAFKA_SCHEMA_REGISTRY_ENDPOINT")) \
     .getOrCreate()
 
-# Set Hadoop AWS configurations for S3 access
-hadoop_conf = spark._jsc.hadoopConfiguration()
-hadoop_conf.set("fs.s3a.access.key", os.environ.get("AWS_ACCESS_KEY_ID"))
-hadoop_conf.set("fs.s3a.secret.key", os.environ.get("AWS_SECRET_ACCESS_KEY"))
-hadoop_conf.set("fs.s3a.endpoint", f"s3.{os.environ.get("AWS_REGION")}.amazonaws.com")
-hadoop_conf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+timestamp_str = pendulum.now(tz="UTC").format("YYYYMMDD-HHmmss")
 
-# Consume messages
-df = spark.readStream \
+transactions_df = spark.readStream \
     .format("kafka") \
-    .option("kafka.bootstrap.servers", "kafka:9092") \
+    .option("kafka.bootstrap.servers", os.environ.get("KAFKA_ENDPOINT")) \
     .option("subscribe", os.environ.get("KAFKA_TOPIC")) \
-    .option("startingOffsets", "latest") \
+    .option("startingOffsets", "earliest") \
     .load()
 
-# Set schema
-schema = StructType() \
-    .add("transaction_id", StringType()) \
-    .add("customer_id", IntegerType()) \
-    .add("company_id", IntegerType()) \
-    .add("volume_traded", IntegerType()) \
-    .add("transaction_timestamp_utc", TimestampType())
+transactions_df = transactions_df.select(
+    F.from_avro(transactions_df.value, os.environ.get("KAFKA_VALUE_SCHEMA")).alias("value"),
+    F.from_avro(transactions_df.key, os.environ.get("KAFKA_KEY_SCHEMA")).alias("key")
+).select(
+    "value.transaction_id",
+    "value.customer_id",
+    "value.company_id",
+    "value.volume_traded",
+    "value.transaction_timestamp_utc",
+    "key.company_id"
+)
 
-
-df_parsed = df_raw.selectExpr("CAST(value AS STRING) as json_str") \
-    .select(from_json(col("json_str"), schema).alias("data")) \
-    .select("data.*")
-
-# 6. Write to S3 in append mode (partitioned per batch)
-query = df_parsed.writeStream \
-    .format("parquet") \
-    .option("path", "s3a://your-bucket/path/to/stock_transactions/") \
-    .option("checkpointLocation", "/tmp/spark-checkpoint-stock-transactions/") \
-    .outputMode("append") \
-    .start()
-
-query.awaitTermination()
